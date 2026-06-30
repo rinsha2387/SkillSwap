@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/header', { title: 'Write a Review' }) %>
+<body>
+<%- include('../partials/navbar', { activePage: isGroup ? 'explore' : 'chat' }) %>
+<%- include('../partials/topbar') %>
+
+<style>
+  .review-page { padding-top: 64px; min-height: 100vh; background: var(--bg); }
+  .review-container { max-width: 520px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  .review-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg); padding: 32px; box-shadow: var(--shadow-sm);
+  }
+  .review-card h1 {
+    font-family: var(--font-display); font-size: 20px; font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .review-card .sub {
+    font-size: 13px; color: var(--muted); margin-bottom: 24px;
+  }
+
+  .reviewee-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; background: var(--bg);
+    border-radius: var(--radius-sm); margin-bottom: 24px;
+  }
+  .reviewee-row img {
+    width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+  }
+  .reviewee-row .fb {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: #fff; font-weight: 700; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .reviewee-row .info p { font-weight: 700; font-size: 14px; }
+  .reviewee-row .info span { font-size: 12px; color: var(--muted); }
+
+  .star-group { display: flex; gap: 6px; margin-bottom: 20px; }
+  .star-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 32px; line-height: 1; color: #d1d5db; transition: color .15s;
+    padding: 0 2px;
+  }
+  .star-btn.active, .star-btn:hover, .star-btn:hover ~ .star-btn { color: #f59e0b; }
+
+  .review-card label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 6px; }
+  .review-card textarea {
+    width: 100%; padding: 12px 14px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); background: var(--bg);
+    font-family: inherit; font-size: 14px; color: var(--text);
+    resize: vertical; min-height: 100px; box-sizing: border-box;
+  }
+  .review-card textarea:focus { outline: none; border-color: var(--brand); }
+
+  .btn-submit-review {
+    width: 100%; padding: 13px; margin-top: 20px;
+    border-radius: var(--radius-sm); border: none;
+    background: var(--brand); color: #fff;
+    font-family: inherit; font-size: 15px; font-weight: 800;
+    cursor: pointer; transition: all .18s;
+  }
+  .btn-submit-review:hover { background: #6D28D9; transform: translateY(-1px); }
+  .btn-submit-review:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+</style>
+
+<div class="review-page">
+<div class="review-container">
+  <div class="review-card">
+    <h1>Write a Review</h1>
+    <p class="sub">Share your experience — honest reviews help the community</p>
+
+    <!-- reviewee -->
+    <div class="reviewee-row">
+      <% if (reviewee.profilePic) { %>
+        <img src="<%= reviewee.profilePic %>" alt="<%= reviewee.name %>"/>
+      <% } else { %>
+        <div class="fb"><%= reviewee.name.charAt(0).toUpperCase() %></div>
+      <% } %>
+      <div class="info">
+        <p><%= reviewee.name %></p>
+        <span>You're reviewing
+          <%= isGroup ? 'the session host' : 'your swap partner' %>
+        </span>
+      </div>
+    </div>
+
+    <form action="/reviews" method="POST" id="reviewForm">
+      <label>Rating</label>
+      <div class="star-group" id="starGroup">
+        <% for (let i = 1; i <= 5; i++) { %>
+          <button type="button" class="star-btn" data-val="<%= i %>">★</button>
+        <% } %>
+      </div>
+      <input type="hidden" name="rating" id="ratingInput" value="0">
+      <input type="hidden" name="reviewee" value="<%= reviewee._id %>">
+      <% if (isGroup) { %>
+        <input type="hidden" name="groupSession" value="<%= groupSession._id %>">
+      <% } else { %>
+        <input type="hidden" name="swap" value="<%= swap._id %>">
+      <% } %>
+
+      <label for="comment">Comment (optional)</label>
+      <textarea name="comment" id="comment" placeholder="What was your experience like?"></textarea>
+
+      <button type="submit" class="btn-submit-review" id="submitBtn" disabled>Submit Review</button>
+    </form>
+  </div>
+</div>
+</div>
+
+<script>
+  const stars = document.querySelectorAll('.star-btn');
+  const ratingInput = document.getElementById('ratingInput');
+  const submitBtn = document.getElementById('submitBtn');
+
+  stars.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = parseInt(btn.dataset.val);
+      ratingInput.value = val;
+      submitBtn.disabled = false;
+      stars.forEach(s => {
+        s.classList.toggle('active', parseInt(s.dataset.val) <= val);
+      });
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<footer class="ss-footer">
+  <div class="ss-footer-inner">
+
+    <div class="ss-footer-left">
+      <span class="ss-footer-logo">⚡ SkillSwap</span>
+      <p class="ss-footer-copy">© <%= new Date().getFullYear() %> SkillSwap. All rights reserved.</p>
+    </div>
+
+    <nav class="ss-footer-links">
+      <a href="/about">About</a>
+      <a href="/contact">Contact</a>
+      <a href="/terms">Terms</a>
+      <a href="/privacy">Privacy</a>
+    </nav>
+
+  </div>
+</footer>
+
+<style>
+  .ss-footer {
+    background: var(--surface, #fff);
+    border-top: 1.5px solid var(--border, #e5e7eb);
+    padding: 20px 24px;
+    margin-top: auto;
+  }
+
+  .ss-footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .ss-footer-logo {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--brand, #6c63ff);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .ss-footer-copy {
+    font-size: 12px;
+    color: var(--muted, #9ca3af);
+    margin: 0;
+  }
+
+  .ss-footer-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .ss-footer-links a {
+    font-size: 13px;
+    color: var(--muted, #9ca3af);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .ss-footer-links a:hover {
+    color: var(--brand, #6c63ff);
+  }
+
+  @media (max-width: 540px) {
+    .ss-footer-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .ss-footer-links {
+      gap: 14px;
+    }
+  }
+</style>
+
+</body>
+</html>

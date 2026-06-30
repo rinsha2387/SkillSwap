@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/header') %>
+<body>
+
+<%- include('../partials/navbar', { activePage: 'explore' }) %>
+<%- include('../partials/topbar') %>
+
+<div class="page-wrap">
+<div class="explore-container">
+
+  <!-- ── Page Header ── -->
+  <div class="exp-head">
+    <div>
+      <h1 class="exp-title">Explore Skills &amp; People</h1>
+      <p class="exp-sub">Find the perfect swap partner from our global community</p>
+    </div>
+    <a href="/group-sessions/new" class="btn-create-session">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Host a Session
+    </a>
+  </div>
+
+  <!-- ── Search + Filter Bar ── -->
+  <div class="exp-search-row">
+    <form action="/explore" method="GET" class="exp-search-form">
+      <div class="exp-search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" name="q" id="searchInput" class="exp-search-input"
+          placeholder="Search skills, names, or topics..."
+          value="<%= query %>" autocomplete="off"/>
+        <% if (query) { %>
+          <a href="/explore" class="exp-clear-btn" title="Clear">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </a>
+        <% } %>
+      </div>
+    </form>
+  </div>
+
+  <!-- ── Category Pills ── -->
+  <div class="exp-cats">
+    <% categories.forEach(function(cat) {
+         var isActive = (activeCategory === cat) || (cat === 'All' && (!activeCategory || activeCategory === 'All'));
+    %>
+    <a href="/explore<%= cat === 'All' ? '' : '?skill=' + encodeURIComponent(cat) %>"
+       class="cat-pill <%= isActive ? 'cat-pill-active' : '' %>">
+      <%= cat %>
+    </a>
+    <% }) %>
+  </div>
+
+  <!-- ── Trending Skills Row ── -->
+  <div class="trending-row">
+    <% trendingSkills.forEach(function(sk) { %>
+    <a href="/explore?skill=<%= encodeURIComponent(sk.name) %>" class="trending-chip">
+      <span class="tc-name" style="color:<%= sk.col %>"><%= sk.name %></span>
+      <span class="tc-count"><%= sk.learners %> swaps</span>
+    </a>
+    <% }) %>
+  </div>
+
+  <!-- ════════════════════════════════════
+       GROUP SESSIONS SECTION
+  ════════════════════════════════════ -->
+  <div class="gs-section" id="groupSessionsSection">
+    <div class="gs-section-head">
+      <div>
+        <h2 class="gs-section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+          Live & Upcoming Group Sessions
+        </h2>
+        <p class="gs-section-sub">Join a live class or enroll in an upcoming one</p>
+      </div>
+      <a href="/group-sessions/new" class="gs-host-link">+ Host your own</a>
+    </div>
+
+    <!-- Session cards rendered by JS -->
+    <div class="gs-cards-row" id="gsCardsRow">
+      <div class="gs-loading">
+        <div class="gs-spinner"></div>
+        <span>Loading sessions...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Results Count ── -->
+  <p class="exp-count">
+    Showing <strong><%= users.length %></strong> swapper<%= users.length !== 1 ? 's' : '' %>
+    <% if (query) { %> for "<em><%= query %></em>"<% } %>
+    <% if (activeCategory && activeCategory !== 'All') { %> in <em><%= activeCategory %></em><% } %>
+  </p>
+
+  <!-- ── User Cards Grid ── -->
+  <% if (users.length === 0) { %>
+  <div class="exp-empty">
+    <div class="exp-empty-icon"></div>
+    <p>No swappers found</p>
+    <span>Try a different search term or browse all categories</span>
+    <a href="/explore" class="btn-brand-sm">Browse All</a>
+  </div>
+  <% } else { %>
+  <div class="exp-grid">
+    <% users.forEach(function(u) { %>
+    <div class="exp-card">
+      <div class="exp-card-top">
+        <div class="exp-avatar-wrap">
+          <% if (u.profilePic || u.avatar) { %>
+            <img src="<%= u.profilePic || u.avatar %>" alt="<%= u.name %>" class="exp-avatar"/>
+          <% } else { %>
+            <div class="exp-avatar exp-avatar-fb"><%= u.name.charAt(0).toUpperCase() %></div>
+          <% } %>
+          <span class="exp-online"></span>
+        </div>
+        <div class="exp-card-info">
+          <div class="exp-name-row">
+            <h3 class="exp-name"><%= u.name %></h3>
+            <svg class="exp-verified" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <% if (u.location) { %>
+          <p class="exp-loc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="11" height="11">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+            </svg>
+            <%= u.location %>
+          </p>
+          <% } %>
+          <p class="exp-rating">
+            <svg viewBox="0 0 24 24" fill="#F59E0B" width="12" height="12">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            <strong><%= u.rating || '4.8' %></strong>
+            <span>• <%= u.reviewCount || 0 %> swaps</span>
+          </p>
+        </div>
+      </div>
+      <% if (u.bio) { %>
+      <p class="exp-bio"><%= u.bio.length > 90 ? u.bio.slice(0,90) + '…' : u.bio %></p>
+      <% } %>
+      <div class="exp-skill-section">
+        <p class="exp-skill-label">TEACHES</p>
+        <div class="exp-tags">
+          <% if (u.skillsOffered && u.skillsOffered.length) { %>
+            <% u.skillsOffered.slice(0,3).forEach(function(s){ %>
+              <span class="exp-tag exp-tag-offer"><%= s %></span>
+            <% }) %>
+            <% if (u.skillsOffered.length > 3) { %><span class="exp-tag exp-tag-more">+<%= u.skillsOffered.length - 3 %></span><% } %>
+          <% } else { %><span class="exp-tag-empty">—</span><% } %>
+        </div>
+      </div>
+      <div class="exp-skill-section">
+        <p class="exp-skill-label">WANTS TO LEARN</p>
+        <div class="exp-tags">
+          <% if (u.skillsWanted && u.skillsWanted.length) { %>
+            <% u.skillsWanted.slice(0,2).forEach(function(s){ %>
+              <span class="exp-tag exp-tag-want"><%= s %></span>
+            <% }) %>
+            <% if (u.skillsWanted.length > 2) { %><span class="exp-tag exp-tag-more">+<%= u.skillsWanted.length - 2 %></span><% } %>
+          <% } else { %><span class="exp-tag-empty">—</span><% } %>
+        </div>
+      </div>
+      <div class="exp-card-actions">
+        <% if (u.acceptedSwapId) { %>
+          <a href="/chats/<%= u.acceptedSwapId %>" class="exp-btn-swap exp-btn-chat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            </svg>
+            Open Chat
+          </a>
+        <% } else if (u.alreadySent) { %>
+          <button class="exp-btn-swap exp-btn-sent" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+            Request Sent
+          </button>
+        <% } else { %>
+         <button class="exp-btn-swap"
+           onclick="openSwapModal('<%= u._id %>', '<%= u.name.replace(/'/g, '') %>', '<%= (user.skillsOffered||[]).join('|') %>', '<%= (u.skillsOffered||[]).join('|') %>')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+          <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+          </svg>
+          Request Swap
+        </button>
+        <% } %>
+        <a href="/profile/users/<%= u._id %>" class="exp-btn-profile" title="View profile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+  <% } %>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════
+     SWAP MODAL (unchanged)
+════════════════════════════════ -->
+<div class="modal-backdrop" id="swapModal" onclick="closeSwapModal(event)">
+  <div class="swap-modal">
+    <button class="modal-close" onclick="closeSwapModal(null, true)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+    <h2 class="modal-title">Request a Swap</h2>
+    <p class="modal-sub">Sending request to <strong id="modalUserName"></strong></p>
+    <form action="/swaps/send" method="POST" id="swapForm">
+      <input type="hidden" name="receiverId"    id="modalReceiverId"/>
+      <input type="hidden" name="skillsOffered" id="skillsOfferedHidden"/>
+      <input type="hidden" name="skillsWanted"  id="skillsWantedHidden"/>
+      <div class="modal-field">
+        <label class="modal-label">Skills you're offering</label>
+        <div class="modal-tag-wrap" id="offeredWrap" onclick="document.getElementById('offeredTagInput').focus()">
+          <input type="text" id="offeredTagInput" class="modal-tag-input" placeholder="Type a skill, press Enter…"/>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Skills you want to learn</label>
+        <div class="modal-tag-wrap" id="wantedWrap" onclick="document.getElementById('wantedTagInput').focus()">
+          <input type="text" id="wantedTagInput" class="modal-tag-input" placeholder="Type a skill, press Enter…"/>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Message <span class="modal-opt">(optional)</span></label>
+        <textarea name="message" class="modal-textarea" placeholder="Tell them why you'd be a great swap partner…" rows="3"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn-cancel" onclick="closeSwapModal(null,true)">Cancel</button>
+        <button type="submit" class="modal-btn-send">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+            <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+          </svg>
+          Send Request
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .page-wrap         { padding-top: 64px; background: #F7F6FB; min-height: 100vh; }
+  .explore-container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
+
+  /* ── Head ── */
+  .exp-head  { margin-bottom: 22px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .exp-title { font-size: 24px; font-weight: 800; color: #1a1830; margin-bottom: 4px; }
+  .exp-sub   { font-size: 14px; color: #8785A0; }
+
+  .btn-create-session {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 10px 20px; border-radius: 50px;
+    background: var(--brand); color: #fff;
+    font-size: 13px; font-weight: 700; text-decoration: none;
+    white-space: nowrap; transition: all .2s; flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(124,58,237,.3);
+  }
+  .btn-create-session:hover { background: #6D28D9; transform: translateY(-1px); }
+
+  /* ── Search ── */
+  .exp-search-row { margin-bottom: 18px; }
+  .exp-search-form { display: flex; gap: 10px; align-items: center; }
+  .exp-search-wrap {
+    flex: 1; display: flex; align-items: center; gap: 8px;
+    background: #fff; border: 1.5px solid #E8E6F0;
+    border-radius: 50px; padding: 0 18px; height: 46px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .exp-search-wrap:focus-within { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,.1); }
+  .exp-search-wrap svg { color: #9ca3af; flex-shrink: 0; }
+  .exp-search-input {
+    flex: 1; border: none; outline: none; background: transparent;
+    font-size: 14px; color: #1a1830; font-family: inherit;
+  }
+  .exp-search-input::placeholder { color: #9ca3af; }
+  .exp-clear-btn {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #E8E6F0; color: #6b7280;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none; flex-shrink: 0; transition: background .15s;
+  }
+  .exp-clear-btn:hover { background: #DDD6FE; color: #7c3aed; }
+
+  /* ── Category pills ── */
+  .exp-cats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .cat-pill {
+    padding: 7px 18px; border-radius: 50px; font-size: 13px; font-weight: 500; color: #6b7280;
+    background: #fff; border: 1.5px solid #E8E6F0; text-decoration: none; transition: all .18s;
+  }
+  .cat-pill:hover  { border-color: #7c3aed; color: #7c3aed; }
+  .cat-pill-active { background: #7c3aed; color: #fff !important; border-color: #7c3aed; font-weight: 600; }
+
+  /* ── Trending row ── */
+  .trending-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 28px; }
+  .trending-chip {
+    background: #fff; border: 1px solid #E8E6F0; border-radius: 12px; padding: 14px 14px 12px;
+    text-decoration: none; display: flex; flex-direction: column; gap: 4px;
+    transition: transform .18s, box-shadow .18s, border-color .18s;
+  }
+  .trending-chip:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.06); border-color: #DDD6FE; }
+  .tc-name  { font-size: 13px; font-weight: 700; }
+  .tc-count { font-size: 11px; color: #9ca3af; }
+
+  /* ══════════════════════════════
+     GROUP SESSIONS SECTION
+  ══════════════════════════════ */
+  .gs-section { margin-bottom: 36px; }
+  .gs-section-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px; margin-bottom: 16px;
+  }
+  .gs-section-title {
+    font-family: var(--font-display); font-size: 17px; font-weight: 800;
+    color: #1a1830; display: flex; align-items: center; gap: 8px; margin-bottom: 3px;
+  }
+  .gs-section-title svg { color: #7c3aed; }
+  .gs-section-sub { font-size: 13px; color: #8785A0; }
+  .gs-host-link {
+    font-size: 13px; font-weight: 700; color: #7c3aed;
+    text-decoration: none; white-space: nowrap; padding-top: 4px;
+    transition: color .2s;
+  }
+  .gs-host-link:hover { color: #6D28D9; }
+
+  /* Cards row */
+  .gs-cards-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    min-height: 80px;
+  }
+
+  /* Loading */
+  .gs-loading {
+    grid-column: 1/-1; display: flex; align-items: center; justify-content: center;
+    gap: 10px; color: #8785A0; font-size: 13px; padding: 24px 0;
+  }
+  .gs-spinner {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid #E8E6F0; border-top-color: #7c3aed;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Session card */
+  .gs-card {
+    background: #fff; border: 1.5px solid #E8E6F0; border-radius: 16px;
+    overflow: hidden; text-decoration: none; color: inherit;
+    transition: box-shadow .2s, transform .2s, border-color .2s;
+    display: flex; flex-direction: column;
+  }
+  .gs-card:hover { box-shadow: 0 8px 28px rgba(124,58,237,.12); transform: translateY(-2px); border-color: #DDD6FE; }
+
+  .gs-card-top {
+    padding: 16px 18px 12px;
+    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    position: relative;
+  }
+  .gs-card-top.live-top {
+    background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  }
+  .gs-card-status-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .gs-live-badge {
+    background: rgba(255,255,255,.25); color: #fff;
+    font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 50px;
+    display: flex; align-items: center; gap: 4px; letter-spacing: .2px;
+  }
+  .gs-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+  .gs-sched-badge {
+    background: rgba(255,255,255,.2); color: rgba(255,255,255,.9);
+    font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 50px;
+  }
+  .gs-price-tag {
+    margin-left: auto;
+    background: rgba(255,255,255,.2); color: #fff;
+    font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 50px;
+  }
+  .gs-card-title {
+    font-size: 14px; font-weight: 800; color: #fff; line-height: 1.35;
+    margin-bottom: 6px;
+  }
+  .gs-skill-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(255,255,255,.15); color: rgba(255,255,255,.9);
+    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 50px;
+  }
+
+  .gs-card-body { padding: 14px 18px 16px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+
+  .gs-host-row { display: flex; align-items: center; gap: 8px; }
+  .gs-host-pic {
+    width: 22px; height: 22px; border-radius: 50%;
+    object-fit: cover; border: 1.5px solid #EDE9FE;
+  }
+  .gs-host-pic-fb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: #fff; font-size: 9px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    border: 1.5px solid #EDE9FE;
+  }
+  .gs-host-name { font-size: 12px; color: #6b7280; font-weight: 500; }
+
+  .gs-meta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .gs-meta-item {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 11px; color: #9ca3af; font-weight: 500;
+  }
+  .gs-meta-item svg { width: 11px; height: 11px; }
+
+  .gs-spots-row { display: flex; align-items: center; justify-content: space-between; }
+  .gs-spots-text { font-size: 11px; color: #9ca3af; }
+  .gs-spots-text.urgent { color: #EF4444; font-weight: 700; }
+  .gs-mini-progress {
+    width: 80px; height: 4px; background: #E8E6F0;
+    border-radius: 50px; overflow: hidden;
+  }
+  .gs-mini-bar { height: 100%; background: #7c3aed; border-radius: 50px; }
+  .gs-mini-bar.live-bar { background: #10B981; }
+
+  .gs-card-footer {
+    padding: 0 18px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .gs-level-pill {
+    font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 50px;
+    background: #EDE9FE; color: #7c3aed;
+  }
+  .gs-view-btn {
+    font-size: 12px; font-weight: 700; color: #7c3aed;
+    display: flex; align-items: center; gap: 4px; text-decoration: none;
+    transition: gap .15s;
+  }
+  .gs-view-btn:hover { gap: 7px; }
+
+  /* Empty sessions */
+  .gs-empty {
+    grid-column: 1/-1; text-align: center; padding: 32px 20px;
+    background: #fff; border: 1.5px dashed #E8E6F0; border-radius: 16px;
+    color: #9ca3af; font-size: 13px;
+  }
+  .gs-empty a { color: #7c3aed; font-weight: 700; text-decoration: none; }
+
+  /* ── Count ── */
+  .exp-count { font-size: 13px; color: #8785A0; margin-bottom: 18px; }
+  .exp-count strong { color: #1a1830; }
+  .exp-count em { color: #7c3aed; font-style: normal; font-weight: 600; }
+
+  /* ── Grid ── */
+  .exp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .exp-card {
+    background: #fff; border: 1px solid #E8E6F0; border-radius: 16px;
+    padding: 20px; display: flex; flex-direction: column; gap: 12px;
+    transition: box-shadow .2s, transform .2s, border-color .2s;
+  }
+  .exp-card:hover { box-shadow: 0 8px 32px rgba(124,58,237,.10); transform: translateY(-2px); border-color: #DDD6FE; }
+  .exp-card-top { display: flex; gap: 12px; align-items: flex-start; }
+  .exp-avatar-wrap { position: relative; flex-shrink: 0; }
+  .exp-avatar { width: 52px; height: 52px; border-radius: 12px; object-fit: cover; border: 2px solid #EDE9FE; display: block; }
+  .exp-avatar-fb { width: 52px; height: 52px; border-radius: 12px; background: linear-gradient(135deg, #7c3aed, #4f46e5); color: #fff; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid #EDE9FE; }
+  .exp-online { position: absolute; bottom: -2px; right: -2px; width: 12px; height: 12px; border-radius: 50%; background: #10B981; border: 2px solid #fff; }
+  .exp-card-info { flex: 1; min-width: 0; }
+  .exp-name-row { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; }
+  .exp-name { font-size: 15px; font-weight: 800; color: #1a1830; }
+  .exp-verified { flex-shrink: 0; }
+  .exp-loc { display: flex; align-items: center; gap: 3px; font-size: 12px; color: #9ca3af; margin-bottom: 3px; }
+  .exp-rating { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #1a1830; }
+  .exp-rating strong { font-weight: 700; }
+  .exp-rating span { color: #9ca3af; }
+  .exp-bio { font-size: 12.5px; color: #4b5563; line-height: 1.55; }
+  .exp-skill-section { display: flex; flex-direction: column; gap: 5px; }
+  .exp-skill-label { font-size: 10px; font-weight: 700; letter-spacing: .8px; color: #b0aec0; text-transform: uppercase; }
+  .exp-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .exp-tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 50px; }
+  .exp-tag-offer { background: #EDE9FE; color: #7c3aed; }
+  .exp-tag-want  { background: #DBEAFE; color: #1D4ED8; }
+  .exp-tag-more  { background: #F3F4F6; color: #6b7280; font-size: 11px; padding: 3px 8px; border-radius: 50px; font-weight: 600; }
+  .exp-tag-empty { font-size: 12px; color: #c4c0d4; }
+  .exp-card-actions { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+  .exp-btn-swap {
+    flex: 1; padding: 10px; border-radius: 10px; background: #7c3aed; color: #fff;
+    font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px;
+    border: none; cursor: pointer; font-family: inherit; transition: all .18s;
+  }
+  .exp-btn-swap:hover:not(:disabled) { background: #6D28D9; box-shadow: 0 4px 16px rgba(124,58,237,.3); }
+  .exp-btn-sent { background: #F3F4F6; color: #6b7280; cursor: default; }
+  .exp-btn-chat { background: #ede9fe; color: #7c3aed; text-decoration: none; }
+  .exp-btn-chat:hover { background: #7c3aed; color: #fff; box-shadow: 0 4px 16px rgba(124,58,237,.3); }
+  .exp-btn-profile {
+    width: 36px; height: 36px; flex-shrink: 0; border-radius: 8px;
+    border: 1.5px solid #E8E6F0; background: #fff; color: #9ca3af;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none; transition: all .18s;
+  }
+  .exp-btn-profile:hover { border-color: #7c3aed; color: #7c3aed; }
+
+  /* ── Empty ── */
+  .exp-empty { text-align: center; padding: 60px 20px; background: #fff; border: 1px solid #E8E6F0; border-radius: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .exp-empty-icon { font-size: 40px; }
+  .exp-empty p { font-weight: 800; font-size: 16px; color: #1a1830; }
+  .exp-empty span { font-size: 13px; color: #9ca3af; }
+  .btn-brand-sm { margin-top: 8px; padding: 9px 22px; border-radius: 50px; background: #7c3aed; color: #fff; text-decoration: none; font-size: 13px; font-weight: 700; transition: background .18s; display: inline-block; }
+  .btn-brand-sm:hover { background: #6D28D9; }
+
+  /* ── Modal ── */
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(26,24,48,.55); backdrop-filter: blur(4px); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
+  .modal-backdrop.open { display: flex; }
+  .swap-modal { background: #fff; border-radius: 20px; padding: 28px; width: 100%; max-width: 480px; position: relative; box-shadow: 0 24px 80px rgba(124,58,237,.2); animation: modalIn .2s ease; }
+  @keyframes modalIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .modal-close { position: absolute; top: 16px; right: 16px; width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid #E8E6F0; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #6b7280; transition: all .15s; }
+  .modal-close:hover { border-color: #7c3aed; color: #7c3aed; }
+  .modal-title { font-size: 18px; font-weight: 800; color: #1a1830; margin-bottom: 4px; }
+  .modal-sub { font-size: 13px; color: #9ca3af; margin-bottom: 20px; }
+  .modal-sub strong { color: #7c3aed; }
+  .modal-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .modal-label { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .6px; }
+  .modal-opt { font-weight: 400; text-transform: none; font-size: 11px; }
+  .modal-tag-wrap { border: 1.5px solid #E8E6F0; border-radius: 10px; padding: 8px 10px; background: #faf9ff; display: flex; flex-wrap: wrap; gap: 5px; min-height: 44px; cursor: text; transition: border .15s; }
+  .modal-tag-wrap:focus-within { border-color: #7c3aed; background: #fff; }
+  .modal-tag-input { border: none; outline: none; background: transparent; font-size: 13px; color: #1a1830; font-family: inherit; min-width: 140px; flex: 1; }
+  .modal-tag-input::placeholder { color: #c9c1f5; }
+  .mtag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 50px; font-size: 12px; font-weight: 600; }
+  .mtag-offer { background: #EDE9FE; color: #7c3aed; }
+  .mtag-want  { background: #DBEAFE; color: #1D4ED8; }
+  .mtag-remove { cursor: pointer; opacity: .6; background: none; border: none; color: inherit; font-size: 13px; padding: 0; line-height: 1; }
+  .mtag-remove:hover { opacity: 1; }
+  .modal-textarea { border: 1.5px solid #E8E6F0; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #1a1830; font-family: inherit; background: #faf9ff; resize: vertical; outline: none; width: 100%; transition: border .15s; }
+  .modal-textarea:focus { border-color: #7c3aed; background: #fff; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
+  .modal-btn-cancel { flex: 1; padding: 11px; border-radius: 10px; border: 1.5px solid #E8E6F0; background: #fff; font-size: 13px; font-weight: 600; color: #6b7280; cursor: pointer; font-family: inherit; transition: all .15s; }
+  .modal-btn-cancel:hover { border-color: #7c3aed; color: #7c3aed; }
+  .modal-btn-send { flex: 2; padding: 11px; border-radius: 10px; background: #7c3aed; color: #fff; border: none; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; font-family: inherit; transition: all .15s; }
+  .modal-btn-send:hover { background: #6D28D9; box-shadow: 0 4px 16px rgba(124,58,237,.3); }
+
+  /* ── Responsive ── */
+  @media (max-width: 1024px) {
+    .explore-container { padding: 28px 20px 56px; }
+    .trending-row { grid-template-columns: repeat(3, 1fr); }
+    .exp-grid { grid-template-columns: repeat(2, 1fr); }
+    .gs-cards-row { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* Tablet fine-tuning */
+  @media (max-width: 768px) {
+    .exp-head { gap: 14px; }
+    .exp-title { font-size: 21px; }
+    .exp-search-wrap { height: 48px; }
+    .gs-section-head { gap: 10px; }
+  }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    .explore-container { padding: 18px 16px 48px; }
+
+    .exp-head {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+    }
+    .btn-create-session {
+      width: 100%;
+      padding: 13px 20px;
+      font-size: 13.5px;
+    }
+
+    .exp-search-row { margin-bottom: 16px; }
+    .exp-search-wrap {
+      height: 48px;
+      padding: 0 16px;
+      box-shadow: 0 2px 10px rgba(26,24,48,.05);
+    }
+    .exp-search-input { font-size: 16px; }
+    .exp-clear-btn { width: 26px; height: 26px; }
+
+    .exp-cats {
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      padding-bottom: 4px;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .exp-cats::-webkit-scrollbar { display: none; }
+
+    .trending-row { grid-template-columns: repeat(2, 1fr); }
+    .exp-grid { grid-template-columns: 1fr; }
+    .gs-cards-row { grid-template-columns: 1fr; }
+
+    .gs-section-head { flex-direction: column; align-items: stretch; }
+    .gs-host-link { padding-top: 0; align-self: flex-start; }
+  }
+
+  /* Small phones */
+  @media (max-width: 380px) {
+    .exp-title { font-size: 19px; }
+  }
+</style>
+
+<script>
+  /* ══════════════════════════════
+     GROUP SESSIONS — load & render
+  ══════════════════════════════ */
+  async function loadGroupSessions() {
+    try {
+      const res  = await fetch('/group-sessions/');
+      const data = await res.json();
+      const row  = document.getElementById('gsCardsRow');
+
+      if (!data.sessions || data.sessions.length === 0) {
+        row.innerHTML = `
+          <div class="gs-empty">
+            No sessions scheduled yet.
+            <a href="/group-sessions/new">Be the first to host one!</a>
+          </div>`;
+        return;
+      }
+
+      row.innerHTML = data.sessions.map(s => buildSessionCard(s)).join('');
+    } catch (e) {
+      document.getElementById('gsCardsRow').innerHTML =
+        '<div class="gs-empty">Could not load sessions.</div>';
+    }
+  }
+
+  function buildSessionCard(s) {
+    const isLive    = s.status === 'active';
+    const paidCount = s.participants ? s.participants.filter(p => p.paid || s.isFree).length : 0;
+    const fillPct   = Math.round((paidCount / s.maxParticipants) * 100);
+    const spotsLeft = Math.max(0, s.maxParticipants - paidCount);
+    const dateStr   = new Date(s.scheduledAt).toLocaleDateString('en-IN', { weekday:'short', month:'short', day:'numeric' });
+    const timeStr   = new Date(s.scheduledAt).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+    const hostPic   = s.host && s.host.profilePic
+      ? `<img class="gs-host-pic" src="${s.host.profilePic}" alt="${s.host.name}"/>`
+      : `<div class="gs-host-pic-fb">${s.host ? s.host.name.charAt(0).toUpperCase() : '?'}</div>`;
+
+    const statusBadge = isLive
+      ? `<span class="gs-live-badge"><span class="gs-live-dot"></span> LIVE</span>`
+      : `<span class="gs-sched-badge">Upcoming</span>`;
+
+    const priceBadge = s.isFree
+      ? `<span class="gs-price-tag">FREE</span>`
+      : `<span class="gs-price-tag">₹${s.price}</span>`;
+
+    return `
+      <a href="/group-sessions/${s._id}" class="gs-card">
+        <div class="gs-card-top ${isLive ? 'live-top' : ''}">
+          <div class="gs-card-status-row">
+            ${statusBadge}
+            ${priceBadge}
+          </div>
+          <div class="gs-card-title">${s.title}</div>
+          <span class="gs-skill-chip">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            ${s.skillTaught}
+          </span>
+        </div>
+        <div class="gs-card-body">
+          <div class="gs-host-row">
+            ${hostPic}
+            <span class="gs-host-name">by ${s.host ? s.host.name : 'Unknown'}</span>
+          </div>
+          <div class="gs-meta-row">
+            <span class="gs-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              ${dateStr}
+            </span>
+            <span class="gs-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              ${timeStr}
+            </span>
+            <span class="gs-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+              ${s.duration}min
+            </span>
+          </div>
+          <div class="gs-spots-row">
+            <span class="gs-spots-text ${spotsLeft <= 3 ? 'urgent' : ''}">
+              ${spotsLeft === 0 ? 'Full' : spotsLeft + ' spots left'}
+            </span>
+            <div class="gs-mini-progress">
+              <div class="gs-mini-bar ${isLive ? 'live-bar' : ''}" style="width:${fillPct}%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="gs-card-footer">
+          <span class="gs-level-pill">${s.level}</span>
+          <span class="gs-view-btn">
+            ${isLive ? 'Join Now' : 'View Details'}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </span>
+        </div>
+      </a>`;
+  }
+
+  loadGroupSessions();
+
+  /* ══════════════════════════════
+     SWAP MODAL
+  ══════════════════════════════ */
+  var offeredTags = [];
+  var wantedTags  = [];
+
+ function openSwapModal(userId, userName, offeredStr, wantedStr) {
+  document.getElementById('modalReceiverId').value = userId;
+  document.getElementById('modalUserName').textContent = userName;
+  offeredTags = []; wantedTags = [];
+  clearWrap('offeredWrap', 'offeredTagInput');
+  clearWrap('wantedWrap',  'wantedTagInput');
+
+  // Pre-fill YOUR skills into the offered field
+  if (offeredStr) {
+    offeredStr.split('|').map(function(s){ return s.trim(); }).filter(Boolean).forEach(function(s) {
+      addTag(s, offeredTags, 'offeredWrap', 'offeredTagInput', 'mtag-offer');
+    });
+  }
+
+  
+  if (wantedStr) {
+    wantedStr.split('|').map(function(s){ return s.trim(); }).filter(Boolean).forEach(function(s) {
+      addTag(s, wantedTags, 'wantedWrap', 'wantedTagInput', 'mtag-want');
+    });
+  }
+
+  document.getElementById('swapModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(function(){ document.getElementById('offeredTagInput').focus(); }, 100);
+}
+
+  function closeSwapModal(e, force) {
+    if (force || (e && e.target === document.getElementById('swapModal'))) {
+      document.getElementById('swapModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+
+function clearWrap(wrapId, inputId) {
+  // Remove only tag spans, never touch the input
+  var wrap = document.getElementById(wrapId);
+  wrap.querySelectorAll('.mtag').forEach(function(t) { t.remove(); });
+  var input = document.getElementById(inputId);
+  if (input) input.value = '';
+}
+
+function addTag(value, list, wrapId, inputId, cls) {
+  var val = value.trim().replace(/,+$/, '');
+  if (!val || list.indexOf(val) !== -1) return;
+  list.push(val);
+
+  var wrap  = document.getElementById(wrapId);
+  var input = document.getElementById(inputId);
+
+  var tag = document.createElement('span');
+  tag.className = 'mtag ' + cls;
+
+  var lname = list === offeredTags ? 'offeredTags' : 'wantedTags';
+  var safeVal = val.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+  tag.innerHTML = val + ' <button type="button" class="mtag-remove" onclick="removeTag(\'' +
+    safeVal + '\',\'' + lname + '\',this)">×</button>';
+
+  // Always insert before input; if input missing, just append
+  if (input && wrap.contains(input)) {
+    wrap.insertBefore(tag, input);
+  } else {
+    wrap.appendChild(tag);
+  }
+
+  if (input) input.value = '';
+}
+
+function removeTag(val, listName, btn) {
+  var list = listName === 'offeredTags' ? offeredTags : wantedTags;
+  var idx  = list.indexOf(val);
+  if (idx > -1) list.splice(idx, 1);
+
+  var tagSpan = btn.parentElement;
+  var wrap    = tagSpan.parentElement;
+
+  tagSpan.remove();
+
+  // Make sure the input is still inside the wrap after removal
+  var inputId = wrap.id === 'offeredWrap' ? 'offeredTagInput' : 'wantedTagInput';
+  var input   = document.getElementById(inputId);
+  if (input && !wrap.contains(input)) {
+    wrap.appendChild(input); // re-attach if it got orphaned
+  }
+  if (input) input.focus();
+}
+
+  function setupTagInput(inputId, wrapId, list, cls) {
+    var input = document.getElementById(inputId);
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(input.value, list, wrapId, inputId, cls); }
+      if (e.key === 'Backspace' && !input.value && list.length) {
+        var last = list[list.length - 1];
+        var lname = list === offeredTags ? 'offeredTags' : 'wantedTags';
+        var lastBtn = document.getElementById(wrapId).querySelector('.mtag:last-of-type .mtag-remove');
+        if (lastBtn) removeTag(last, lname, lastBtn);
+      }
+    });
+    input.addEventListener('blur', function() {
+      if (input.value.trim()) addTag(input.value, list, wrapId, inputId, cls);
+    });
+  }
+
+  setupTagInput('offeredTagInput', 'offeredWrap', offeredTags, 'mtag-offer');
+  setupTagInput('wantedTagInput',  'wantedWrap',  wantedTags,  'mtag-want');
+
+  document.getElementById('swapForm').addEventListener('submit', function(e) {
+    var oInput = document.getElementById('offeredTagInput');
+    var wInput = document.getElementById('wantedTagInput');
+    if (oInput.value.trim()) addTag(oInput.value, offeredTags, 'offeredWrap', 'offeredTagInput', 'mtag-offer');
+    if (wInput.value.trim()) addTag(wInput.value, wantedTags,  'wantedWrap',  'wantedTagInput',  'mtag-want');
+    if (offeredTags.length === 0 && wantedTags.length === 0) {
+      e.preventDefault();
+      alert('Please add at least one skill you offer or want to learn.');
+      return;
+    }
+    document.getElementById('skillsOfferedHidden').value = offeredTags.join(',');
+    document.getElementById('skillsWantedHidden').value  = wantedTags.join(',');
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeSwapModal(null, true);
+  });
+</script>
+</body>
+</html>

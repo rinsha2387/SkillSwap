@@ -1,0 +1,159 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/topbar') %>
+
+<div class="payment-result-page">
+  <div class="result-card success-card">
+    <div class="result-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="9 12 11 14 15 10"/>
+      </svg>
+    </div>
+
+    <h1>Payment Successful!</h1>
+    <p class="result-subtitle">Your payment has been confirmed. You're all set!</p>
+
+    <% if (payment) { %>
+    <div class="payment-summary">
+      <div class="summary-row">
+        <span>Amount Paid</span>
+        <strong>₹<%= (payment.amount / 100).toFixed(2) %></strong>
+      </div>
+      <div class="summary-row">
+        <span>To</span>
+        <strong><%= payment.payee.name %></strong>
+      </div>
+      <div class="summary-row">
+        <span>Type</span>
+        <strong><%= payment.paymentType === 'paid_session' ? 'Paid Session' : 'Group Swap' %></strong>
+      </div>
+      <div class="summary-row">
+        <span>Status</span>
+        <strong class="badge-success">Completed</strong>
+      </div>
+    </div>
+    <% } %>
+
+    <div class="result-actions">
+      <a href="/dashboard" class="btn-primary">Go to Dashboard</a>
+      <a href="/payment/history" class="btn-outline">View Payment History</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .payment-result-page {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: var(--bg, #eeeaf8);
+  }
+
+  .result-card {
+    background: white;
+    border-radius: 20px;
+    padding: 3rem 2.5rem;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(108, 99, 255, 0.12);
+  }
+
+  .result-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+  }
+
+  .success-card .result-icon {
+    background: #e6faf0;
+    color: #22c55e;
+  }
+
+  .result-icon svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .result-card h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 0.5rem;
+  }
+
+  .result-subtitle {
+    color: #666;
+    margin-bottom: 2rem;
+  }
+
+  .payment-summary {
+    background: #f8f6ff;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #ede9fc;
+    font-size: 0.9rem;
+    color: #444;
+  }
+
+  .summary-row:last-child { border-bottom: none; }
+
+  .badge-success {
+    color: #22c55e;
+    background: #e6faf0;
+    padding: 0.2rem 0.7rem;
+    border-radius: 99px;
+    font-size: 0.8rem;
+  }
+
+  .result-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .btn-primary {
+    background: var(--brand, #6c63ff);
+    color: white;
+    padding: 0.85rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary:hover { opacity: 0.9; }
+
+  .btn-outline {
+    border: 2px solid var(--brand, #6c63ff);
+    color: var(--brand, #6c63ff);
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn-outline:hover {
+    background: var(--brand, #6c63ff);
+    color: white;
+  }
+</style>
+
+<%- include('../partials/footer') %>

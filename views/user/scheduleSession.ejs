@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/header', { title: 'Schedule Session' }) %>
+<body>
+
+<%- include('../partials/navbar', { activePage: 'swaps' }) %>
+<%- include('../partials/topbar') %>
+
+<style>
+  .sch-page { padding-top: 64px; min-height: 100vh; background: var(--bg); }
+  .sch-container { max-width: 600px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  .sch-toprow { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+  .sch-back {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); text-decoration: none; transition: all .2s; flex-shrink: 0;
+  }
+  .sch-back:hover { border-color: var(--brand); color: var(--brand); }
+  .sch-toprow h1 { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--text); }
+  .sch-toprow p  { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  /* Partner card */
+  .sch-partner {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 20px; box-shadow: var(--shadow-sm);
+  }
+  .sch-partner-avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    object-fit: cover; border: 2px solid var(--brand); flex-shrink: 0;
+  }
+  .sch-partner-avatar-fb {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: #fff; font-size: 18px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; border: 2px solid var(--brand);
+  }
+  .sch-partner-info h4 { font-size: 15px; font-weight: 700; color: var(--text); }
+  .sch-partner-info p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .sch-partner-badge {
+    margin-left: auto; background: rgba(16,185,129,.1); color: #059669;
+    font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 50px;
+    display: flex; align-items: center; gap: 5px;
+  }
+
+  /* Jitsi info banner */
+  .jitsi-banner {
+    background: linear-gradient(135deg, #EEF2FF, #F5F3FF);
+    border: 1.5px solid rgba(79,70,229,.2);
+    border-radius: var(--radius); padding: 14px 18px;
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 20px;
+  }
+  .jitsi-banner-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--brand-glow);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .jitsi-banner-icon svg { width: 18px; height: 18px; color: var(--brand); }
+  .jitsi-banner-text p { font-size: 13px; font-weight: 700; color: var(--brand); }
+  .jitsi-banner-text span { font-size: 12px; color: var(--muted); }
+  .jitsi-link-preview {
+    margin-left: auto; font-size: 11px; font-weight: 600;
+    color: var(--muted); background: var(--bg);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 10px; white-space: nowrap;
+  }
+
+  /* Existing session notice */
+  .sch-existing {
+    background: rgba(245,158,11,.06); border: 1.5px solid rgba(245,158,11,.25);
+    border-radius: var(--radius); padding: 13px 18px;
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+  }
+  .sch-existing svg { width: 16px; height: 16px; color: var(--yellow); flex-shrink: 0; }
+  .sch-existing p   { font-size: 13px; color: #92400e; font-weight: 600; }
+  .sch-existing span{ font-size: 12px; color: var(--muted); }
+
+  /* Form */
+  .sch-form-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow-sm);
+  }
+  .sch-form-card h3 {
+    font-family: var(--font-display); font-size: 16px; font-weight: 700;
+    color: var(--text); margin-bottom: 22px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .form-row { margin-bottom: 20px; }
+  .form-row label {
+    display: block; font-size: 12px; font-weight: 700;
+    color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 7px;
+  }
+  .form-row input,
+  .form-row select,
+  .form-row textarea {
+    width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    padding: 11px 14px; font-size: 14px; font-family: var(--font-body);
+    color: var(--text); background: var(--bg); outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .form-row input:focus,
+  .form-row select:focus,
+  .form-row textarea:focus {
+    border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-glow); background: #fff;
+  }
+  .form-row textarea { resize: vertical; min-height: 80px; }
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .sch-submit-row { display: flex; gap: 12px; margin-top: 28px; }
+  .sch-submit-row .btn { flex: 1; justify-content: center; padding: 13px; font-size: 14px; }
+
+  @media (max-width: 600px) {
+    .sch-container { padding: 20px 16px 80px; }
+    .sch-form-card { padding: 20px 18px; }
+    .form-grid-2 { grid-template-columns: 1fr; }
+    .sch-submit-row { flex-direction: column; }
+    .jitsi-link-preview { display: none; }
+  }
+</style>
+
+<div class="sch-page">
+  <div class="sch-container">
+
+    <!-- Top row -->
+    <div class="sch-toprow">
+      <a href="/chats/<%= swap._id %>" class="sch-back">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </a>
+      <div>
+        <h1> Schedule a Session</h1>
+        <p>Set a time — your meeting link is auto-generated</p>
+      </div>
+    </div>
+
+    <!-- Partner card -->
+    <div class="sch-partner">
+      <% if (otherUser.profilePic) { %>
+        <img class="sch-partner-avatar" src="<%= otherUser.profilePic %>" alt="<%= otherUser.name %>"/>
+      <% } else { %>
+        <div class="sch-partner-avatar-fb"><%= otherUser.name.charAt(0).toUpperCase() %></div>
+      <% } %>
+      <div class="sch-partner-info">
+        <h4><%= otherUser.name %></h4>
+        <p>Your swap partner</p>
+      </div>
+      <span class="sch-partner-badge">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6L9 17l-5-5"/></svg>
+        Swap Active
+      </span>
+    </div>
+
+    <!-- Jitsi auto-link banner -->
+    <!-- <div class="jitsi-banner">
+      <div class="jitsi-banner-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+        </svg>
+      </div>
+      <div class="jitsi-banner-text">
+        <p>Meeting link auto-generated via Jitsi</p>
+        <span>Free · No account needed · Works in browser</span>
+      </div>
+      <span class="jitsi-link-preview">meet.jit.si/skillswap-...</span>
+    </div> -->
+
+    <!-- Existing session notice -->
+    <% if (existing) { %>
+    <div class="sch-existing">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <div>
+        <p>A session already exists for this swap</p>
+        <span>Submitting will update the existing session</span>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Form -->
+    <div class="sch-form-card">
+      <h3>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        Session Details
+      </h3>
+
+      <form action="/sessions/<%= swap._id %>/schedule" method="POST">
+
+        <div class="form-row">
+          <label>Session Title</label>
+          <input
+            type="text" name="title"
+            placeholder="e.g. React + Figma Swap"
+            value="<%= existing ? existing.title : '' %>"
+            maxlength="80"
+          />
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label>Date & Time *</label>
+            <input
+              type="datetime-local" name="scheduledAt" required
+              value="<%= existing ? new Date(existing.scheduledAt).toISOString().slice(0,16) : '' %>"
+              min="<%= new Date().toISOString().slice(0,16) %>"
+            />
+          </div>
+          <div class="form-row">
+            <label>Duration</label>
+            <select name="duration">
+              <option value="30"  <%= existing && existing.duration===30  ? 'selected':'' %>>30 minutes</option>
+              <option value="45"  <%= existing && existing.duration===45  ? 'selected':'' %>>45 minutes</option>
+              <option value="60"  <%= !existing || existing.duration===60 ? 'selected':'' %>>1 hour</option>
+              <option value="90"  <%= existing && existing.duration===90  ? 'selected':'' %>>1.5 hours</option>
+              <option value="120" <%= existing && existing.duration===120 ? 'selected':'' %>>2 hours</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label>Notes <span style="font-weight:400;text-transform:none">(optional)</span></label>
+          <textarea name="notes" placeholder="What will you cover? Any prep needed?"><%= existing ? existing.notes : '' %></textarea>
+        </div>
+
+        <div class="sch-submit-row">
+          <a href="/chats/<%= swap._id %>" class="btn btn-outline">Cancel</a>
+          <button type="submit" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <%= existing ? 'Update Session' : 'Schedule Session' %>
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

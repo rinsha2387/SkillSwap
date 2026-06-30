@@ -1,0 +1,704 @@
+<%- include('../partials/header') %>
+<%- include('../partials/adminSidebar',{ activePage: 'users' }) %>
+
+<div class="page-wrap">
+<div class="profile-container">
+
+  <!-- ═══════════════════════════════════
+       PROFILE CARD
+  ════════════════════════════════════ -->
+  <div class="profile-card">
+
+    <!-- Cover Banner -->
+    <div class="profile-cover"></div>
+
+    <!-- Avatar -->
+    <div class="profile-avatar-wrap">
+      <% if (user.avatar) { %>
+        <img src="<%= user.avatar %>" alt="<%= user.name %>" class="profile-avatar"/>
+      <% } else { %>
+        <div class="profile-avatar profile-avatar-fb">
+          <%= user.name.charAt(0).toUpperCase() %>
+        </div>
+      <% } %>
+      <span class="profile-verified-badge" title="Verified">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </span>
+    </div>
+
+    <!-- Identity -->
+    <div class="profile-identity">
+      <div class="profile-name-row">
+        <h1 class="profile-name"><%= user.name %></h1>
+        <span class="profile-verified-tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          Verified
+        </span>
+      </div>
+
+      <div class="profile-meta">
+        <% if (user.location) { %>
+        <span class="meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+          </svg>
+          <%= user.location %>
+        </span>
+        <% } %>
+        <span class="meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Joined <%= new Date(user.createdAt || Date.now()).toLocaleDateString('en-US',{month:'short', year:'numeric'}) %>
+        </span>
+      </div>
+
+      <!-- Rating -->
+      <div class="profile-rating">
+        <%
+          var rating = user.rating || 4.9;
+          var reviewsCount = user.reviewCount || 21;
+          var fullStars = Math.floor(rating);
+          var hasHalf = (rating % 1) >= 0.5;
+        %>
+        <div class="stars">
+          <% for(var i=1; i<=5; i++) { %>
+            <% if(i <= fullStars) { %>
+              <svg viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" stroke-width="1" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <% } else if(i === fullStars+1 && hasHalf) { %>
+              <svg viewBox="0 0 24 24" width="16" height="16"><defs><linearGradient id="half"><stop offset="50%" stop-color="#F59E0B"/><stop offset="50%" stop-color="#E5E7EB"/></linearGradient></defs><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="url(#half)" stroke="#F59E0B" stroke-width="1"/></svg>
+            <% } else { %>
+              <svg viewBox="0 0 24 24" fill="#E5E7EB" stroke="#E5E7EB" stroke-width="1" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <% } %>
+          <% } %>
+        </div>
+        <span class="rating-num"><%= rating %></span>
+        <span class="rating-reviews">(<%= reviewsCount %> reviews)</span>
+      </div>
+
+      <!-- Bio -->
+      <% if (user.bio) { %>
+      <p class="profile-bio"><%= user.bio %></p>
+      <% } %>
+
+      <!-- Availability -->
+      <% if (user.availability) { %>
+      <div class="profile-avail">
+        <p class="avail-label">AVAILABILITY</p>
+        <div class="avail-row">
+          <%
+            var days = ['M','T','W','T','F','S','S'];
+            var fullDays = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+            var userDays = user.availability.days || [];
+          %>
+          <% days.forEach(function(d, i) {
+               var isActive = userDays.indexOf(fullDays[i]) !== -1;
+          %>
+            <span class="avail-day <%= isActive ? 'avail-day-active' : '' %>"><%= d %></span>
+          <% }) %>
+          <% if (user.availability && user.availability.from && user.availability.to) { %>
+          <span class="avail-time">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <%= user.availability.from %> - <%= user.availability.to %>
+          </span>
+          <% } %>
+        </div>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="profile-stats">
+      <div class="pstat">
+        <span class="pstat-num"><%= status ? status.completed : 0 %></span>
+        <span class="pstat-lbl">Completed Swaps</span>
+      </div>
+      <div class="pstat-divider"></div>
+      <div class="pstat">
+        <span class="pstat-num"><%= user.skillsOffered ? user.skillsOffered.length : 0 %></span>
+        <span class="pstat-lbl">Skills Offered</span>
+      </div>
+      <div class="pstat-divider"></div>
+      <div class="pstat">
+        <span class="pstat-num"><%= user.skillsWanted ? user.skillsWanted.length : 0 %></span>
+        <span class="pstat-lbl">Skills Wanted</span>
+      </div>
+    </div>
+
+  </div><!-- /profile-card -->
+
+
+  <!-- ═══════════════════════════════════
+       TABS
+  ════════════════════════════════════ -->
+  <div class="profile-tabs">
+    <button class="ptab active" data-tab="skills">Skills</button>
+    <button class="ptab" data-tab="reviews">Reviews</button>
+    <button class="ptab" data-tab="swaps">Completed Swaps</button>
+    <button class="ptab" data-tab="verification">Verification</button>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       TAB PANELS
+  ════════════════════════════════════ -->
+
+  <!-- SKILLS TAB -->
+  <div class="tab-panel active" id="tab-skills">
+    <div class="skills-two-col">
+      <div class="card skill-col">
+        <div class="skill-col-head">
+          <h3>Skills They Teach</h3>
+        </div>
+        <div class="skill-tags">
+          <% if (user.skillsOffered && user.skillsOffered.length > 0) { %>
+            <% user.skillsOffered.forEach(function(s) { %>
+              <span class="skill-tag skill-tag-offer"><%= s %></span>
+            <% }) %>
+          <% } else { %>
+            <p class="skill-empty">No skills added yet.</p>
+          <% } %>
+        </div>
+      </div>
+      <div class="card skill-col">
+        <div class="skill-col-head">
+          <h3>Skills They Want to Learn</h3>
+        </div>
+        <div class="skill-tags">
+          <% if (user.skillsWanted && user.skillsWanted.length > 0) { %>
+            <% user.skillsWanted.forEach(function(s) { %>
+              <span class="skill-tag skill-tag-want"><%= s %></span>
+            <% }) %>
+          <% } else { %>
+            <p class="skill-empty">No skills added yet.</p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEWS TAB -->
+  <div class="tab-panel" id="tab-reviews">
+    <% if (reviews && reviews.length > 0) { %>
+      <div class="reviews-list">
+        <% reviews.forEach(function(r) { %>
+        <div class="card review-card">
+          <div class="review-top">
+            <div class="review-avatar-wrap">
+              <% if (r.reviewer && r.reviewer.avatar) { %>
+                <img src="<%= r.reviewer.avatar %>" class="review-avatar" alt="<%= r.reviewer.name %>"/>
+              <% } else { %>
+                <div class="review-avatar review-avatar-fb">
+                  <%= r.reviewer ? r.reviewer.name.charAt(0).toUpperCase() : '?' %>
+                </div>
+              <% } %>
+            </div>
+            <div>
+              <p class="review-name"><%= r.reviewer ? r.reviewer.name : 'Anonymous' %></p>
+              <p class="review-date"><%= new Date(r.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) %></p>
+            </div>
+            <div class="review-stars">
+              <% for(var s=1;s<=5;s++) { %>
+                <svg viewBox="0 0 24 24" fill="<%= s<=r.rating?'#F59E0B':'#E5E7EB' %>" width="14" height="14">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              <% } %>
+            </div>
+          </div>
+          <p class="review-text"><%= r.comment %></p>
+        </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="empty-tab">
+        <div class="empty-icon">⭐</div>
+        <p>No reviews yet</p>
+        <span>Complete swaps to receive reviews</span>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- COMPLETED SWAPS TAB -->
+  <div class="tab-panel" id="tab-swaps">
+    <% if (recentRequests && recentRequests.filter(function(r){return r.status==='completed'}).length > 0) { %>
+      <div class="swaps-list">
+        <% recentRequests.filter(function(r){return r.status==='completed'}).forEach(function(r) { %>
+        <div class="card swap-row">
+          <div class="swap-row-avatar">
+            <% if (r.otherUser && r.otherUser.avatar) { %>
+              <img src="<%= r.otherUser.avatar %>" alt="<%= r.otherUser.name %>"/>
+            <% } else { %>
+              <div class="swap-row-fb"><%= r.otherUser ? r.otherUser.name.charAt(0).toUpperCase() : '?' %></div>
+            <% } %>
+          </div>
+          <div class="swap-row-body">
+            <p class="swap-row-name"><%= r.otherUser ? r.otherUser.name : 'Unknown' %></p>
+            <div class="swap-row-skills">
+              <% if(r.skillsOffered && r.skillsOffered[0]) { %><span class="skill-tag skill-tag-offer"><%= r.skillsOffered[0] %></span><% } %>
+              <span class="swap-arrow">⇄</span>
+              <% if(r.skillsWanted && r.skillsWanted[0]) { %><span class="skill-tag skill-tag-want"><%= r.skillsWanted[0] %></span><% } %>
+            </div>
+          </div>
+          <span class="badge-done">Completed</span>
+        </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="empty-tab">
+        <div class="empty-icon">🤝</div>
+        <p>No completed swaps yet</p>
+        <span>Accept swap requests to see history here</span>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- VERIFICATION TAB -->
+  <div class="tab-panel" id="tab-verification">
+    <div class="verif-grid">
+      <%
+        var emailVerified = !!(user.email);
+        var githubUrl     = user.verifications && user.verifications.githubUrl   ? user.verifications.githubUrl   : '';
+        var linkedinUrl   = user.verifications && user.verifications.linkedinUrl ? user.verifications.linkedinUrl : '';
+      %>
+
+      <!-- Email -->
+      <div class="card verif-card">
+        <div class="verif-icon-wrap verif-icon-email">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="verif-body">
+          <p class="verif-title">Email Address</p>
+          <p class="verif-sub"><%= user.email || 'Not provided' %></p>
+        </div>
+        <span class="verif-badge <%= emailVerified ? 'vbadge-yes' : 'vbadge-no' %>">
+          <% if (emailVerified) { %>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg>
+            Verified
+          <% } else { %>
+            Pending
+          <% } %>
+        </span>
+      </div>
+
+      <!-- GitHub -->
+      <div class="card verif-card">
+        <div class="verif-icon-wrap verif-icon-github">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/>
+          </svg>
+        </div>
+        <div class="verif-body">
+          <p class="verif-title">GitHub</p>
+          <% if (githubUrl) { %>
+            <a href="<%= githubUrl %>" target="_blank" class="verif-link"><%= githubUrl.replace('https://','').replace('http://','') %></a>
+          <% } else { %>
+            <p class="verif-sub">Not connected</p>
+          <% } %>
+        </div>
+        <span class="verif-badge <%= githubUrl ? 'vbadge-yes' : 'vbadge-no' %>">
+          <% if (githubUrl) { %>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg>
+            Connected
+          <% } else { %>
+            Not Added
+          <% } %>
+        </span>
+      </div>
+
+      <!-- LinkedIn -->
+      <div class="card verif-card">
+        <div class="verif-icon-wrap verif-icon-linkedin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+            <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/>
+            <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+          </svg>
+        </div>
+        <div class="verif-body">
+          <p class="verif-title">LinkedIn</p>
+          <% if (linkedinUrl) { %>
+            <a href="<%= linkedinUrl %>" target="_blank" class="verif-link"><%= linkedinUrl.replace('https://','').replace('http://','') %></a>
+          <% } else { %>
+            <p class="verif-sub">Not connected</p>
+          <% } %>
+        </div>
+        <span class="verif-badge <%= linkedinUrl ? 'vbadge-yes' : 'vbadge-no' %>">
+          <% if (linkedinUrl) { %>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg>
+            Connected
+          <% } else { %>
+            Not Added
+          <% } %>
+        </span>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /profile-container -->
+</div><!-- /page-wrap -->
+
+<!-- ═══════════════════════════════════
+     STYLES
+════════════════════════════════════ -->
+<style>
+  .page-wrap         { padding-top: 64px; background: #F7F6FB; min-height: 100vh; margin-left: 240px; }
+  
+  .profile-container { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  .profile-card {
+    background: #fff; border: 1px solid #ede9fe;
+    border-radius: 20px; overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 24px rgba(124,58,237,.07);
+    position: relative;
+  }
+  .profile-cover {
+    height: 120px;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 40%, #4f46e5 100%);
+    position: relative;
+  }
+  .profile-cover::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 70% 50%, rgba(255,255,255,.08) 0%, transparent 60%);
+  }
+  .profile-avatar-wrap { position: absolute; top: 72px; left: 28px; z-index: 2; }
+  .profile-avatar {
+    width: 90px; height: 90px; border-radius: 18px;
+    object-fit: cover; border: 3px solid #fff;
+    box-shadow: 0 4px 16px rgba(0,0,0,.15); display: block;
+  }
+  .profile-avatar-fb {
+    width: 90px; height: 90px; border-radius: 18px;
+    background: linear-gradient(135deg,#7c3aed,#4f46e5);
+    color: #fff; font-size: 36px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    border: 3px solid #fff; box-shadow: 0 4px 16px rgba(0,0,0,.15);
+  }
+  .profile-verified-badge {
+    position: absolute; bottom: -4px; right: -4px;
+    width: 26px; height: 26px; background: #7c3aed;
+    border-radius: 50%; border: 2.5px solid #fff;
+    display: flex; align-items: center; justify-content: center; color: #fff;
+  }
+  .profile-verified-badge svg { width: 13px; height: 13px; }
+  .profile-identity { padding: 56px 28px 0; margin-bottom: 0; }
+  .profile-name-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .profile-name { font-size: 22px; font-weight: 800; color: #1e1b4b; }
+  .profile-verified-tag {
+    display: flex; align-items: center; gap: 4px;
+    background: #ede9fe; color: #7c3aed;
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 50px;
+  }
+  .profile-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; }
+  .meta-item { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #6b7280; }
+  .profile-rating { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+  .stars { display: flex; gap: 2px; }
+  .rating-num   { font-size: 14px; font-weight: 700; color: #1e1b4b; }
+  .rating-reviews { font-size: 13px; color: #6b7280; }
+  .profile-bio { font-size: 14px; color: #4b5563; line-height: 1.6; margin-bottom: 18px; }
+  .profile-avail { margin-bottom: 24px; }
+  .avail-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #9ca3af; margin-bottom: 10px; text-transform: uppercase; }
+  .avail-row   { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .avail-day {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: #f3f4f6; color: #9ca3af;
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    border: 1.5px solid #e5e7eb;
+  }
+  .avail-day-active { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+  .avail-time { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #6b7280; margin-left: 6px; }
+  .profile-stats {
+    display: flex; align-items: center;
+    padding: 20px 28px; border-top: 1px solid #f0eeff;
+    margin-top: 20px; gap: 0;
+  }
+  .pstat { flex: 1; text-align: center; }
+  .pstat-num { display: block; font-size: 26px; font-weight: 800; color: #1e1b4b; }
+  .pstat-lbl { display: block; font-size: 12px; color: #9ca3af; margin-top: 3px; }
+  .pstat-divider { width: 1px; height: 40px; background: #f0eeff; }
+
+  /* ── Action Row ── */
+  .profile-action-row { margin-bottom: 20px; }
+
+  .action-hint {
+    text-align: center;
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 8px;
+  }
+
+  
+
+  /* ── Tabs ── */
+  .profile-tabs {
+    display: flex; background: #fff;
+    border: 1px solid #ede9fe; border-radius: 16px;
+    padding: 6px; margin-bottom: 20px; gap: 4px;
+    box-shadow: 0 2px 12px rgba(124,58,237,.05);
+  }
+  .ptab {
+    flex: 1; padding: 10px 8px; border-radius: 12px;
+    font-size: 13px; font-weight: 600; color: #6b7280;
+    background: transparent; border: none; cursor: pointer; transition: all .18s;
+    white-space: nowrap;
+  }
+  .ptab:hover  { color: #7c3aed; background: #f5f3ff; }
+  .ptab.active { background: #fff; color: #1e1b4b; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Cards ── */
+  .card { background: #fff; border: 1px solid #ede9fe; border-radius: 16px; box-shadow: 0 2px 12px rgba(124,58,237,.05); }
+  .skills-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .skill-col { padding: 22px; }
+  .skill-col-head { margin-bottom: 16px; }
+  .skill-col-head h3 { font-size: 15px; font-weight: 700; color: #1e1b4b; }
+  .skill-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .skill-tag { padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: 600; display: inline-block; }
+  .skill-tag-offer { background: #ede9fe; color: #7c3aed; }
+  .skill-tag-want  { background: #e0f2fe; color: #0284c7; }
+  .skill-empty { font-size: 13px; color: #9ca3af; }
+
+  /* ── Reviews ── */
+  .reviews-list { display: flex; flex-direction: column; gap: 12px; }
+  .review-card  { padding: 20px; }
+  .review-top   { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .review-avatar, .review-avatar-fb { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .review-avatar-fb { background: linear-gradient(135deg,#7c3aed,#4f46e5); color: #fff; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+  .review-name  { font-weight: 700; font-size: 14px; color: #1e1b4b; }
+  .review-date  { font-size: 12px; color: #9ca3af; }
+  .review-stars { display: flex; gap: 2px; margin-left: auto; }
+  .review-text  { font-size: 14px; color: #4b5563; line-height: 1.6; }
+
+  /* ── Swaps ── */
+  .swaps-list { display: flex; flex-direction: column; gap: 10px; }
+  .swap-row { padding: 16px 20px; display: flex; align-items: center; gap: 14px; }
+  .swap-row-avatar img, .swap-row-fb { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .swap-row-fb { background: linear-gradient(135deg,#7c3aed,#4f46e5); color: #fff; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+  .swap-row-name  { font-weight: 600; font-size: 14px; color: #1e1b4b; margin-bottom: 6px; }
+  .swap-row-skills{ display: flex; align-items: center; gap: 6px; }
+  .swap-arrow { font-size: 14px; color: #9ca3af; }
+  .badge-done { margin-left: auto; background: #dcfce7; color: #16a34a; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 50px; flex-shrink: 0; }
+
+  /* ── Verification ── */
+  .verif-grid { display: flex; flex-direction: column; gap: 10px; }
+  .verif-card { padding: 18px 20px; display: flex; align-items: center; gap: 14px; }
+  .verif-icon-wrap { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .verif-icon-email    { background: #EDE9FE; color: #7c3aed; }
+  .verif-icon-github   { background: #F3F4F6; color: #1a1830; }
+  .verif-icon-linkedin { background: #DBEAFE; color: #1D4ED8; }
+  .verif-body  { flex: 1; min-width: 0; }
+  .verif-title { font-weight: 700; font-size: 14px; color: #1a1830; }
+  .verif-sub   { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+  .verif-link  { font-size: 12px; color: #7c3aed; margin-top: 2px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none; }
+  .verif-link:hover { text-decoration: underline; }
+  .verif-badge { flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 50px; }
+  .vbadge-yes { background: #dcfce7; color: #16a34a; }
+  .vbadge-no  { background: #fef9c3; color: #ca8a04; }
+
+  /* ── Empty ── */
+  .empty-tab { text-align: center; padding: 48px 16px; background: #fff; border: 1px solid #ede9fe; border-radius: 16px; }
+  .empty-icon { font-size: 36px; margin-bottom: 10px; }
+  .empty-tab p { font-weight: 700; font-size: 15px; color: #1e1b4b; margin-bottom: 6px; }
+  .empty-tab span { font-size: 13px; color: #9ca3af; }
+
+  /* ── Modal ── */
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(26,24,48,.55); backdrop-filter: blur(4px); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
+  .modal-backdrop.open { display: flex; }
+  .swap-modal { background: #fff; border-radius: 20px; padding: 28px; width: 100%; max-width: 480px; position: relative; box-shadow: 0 24px 80px rgba(124,58,237,.2); animation: modalIn .2s ease; }
+  @keyframes modalIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .modal-close { position: absolute; top: 16px; right: 16px; width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid #E8E6F0; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #6b7280; transition: all .15s; }
+  .modal-close:hover { border-color: #7c3aed; color: #7c3aed; }
+  .modal-title { font-size: 18px; font-weight: 800; color: #1a1830; margin-bottom: 4px; }
+  .modal-sub { font-size: 13px; color: #9ca3af; margin-bottom: 20px; }
+  .modal-sub strong { color: #7c3aed; }
+  .modal-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .modal-label { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .6px; }
+  .modal-opt { font-weight: 400; text-transform: none; font-size: 11px; }
+  .modal-tag-wrap { border: 1.5px solid #E8E6F0; border-radius: 10px; padding: 8px 10px; background: #faf9ff; display: flex; flex-wrap: wrap; gap: 5px; min-height: 44px; cursor: text; transition: border .15s; }
+  .modal-tag-wrap:focus-within { border-color: #7c3aed; background: #fff; }
+  .modal-tag-input { border: none; outline: none; background: transparent; font-size: 13px; color: #1a1830; font-family: inherit; min-width: 140px; flex: 1; }
+  .modal-tag-input::placeholder { color: #c9c1f5; }
+  .mtag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 50px; font-size: 12px; font-weight: 600; }
+  .mtag-offer { background: #EDE9FE; color: #7c3aed; }
+  .mtag-want  { background: #DBEAFE; color: #1D4ED8; }
+  .mtag-remove { cursor: pointer; opacity: .6; background: none; border: none; color: inherit; font-size: 13px; padding: 0; line-height: 1; }
+  .mtag-remove:hover { opacity: 1; }
+  .modal-textarea { border: 1.5px solid #E8E6F0; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #1a1830; font-family: inherit; background: #faf9ff; resize: vertical; outline: none; width: 100%; transition: border .15s; }
+  .modal-textarea:focus { border-color: #7c3aed; background: #fff; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
+  .modal-btn-cancel { flex: 1; padding: 11px; border-radius: 10px; border: 1.5px solid #E8E6F0; background: #fff; font-size: 13px; font-weight: 600; color: #6b7280; cursor: pointer; font-family: inherit; transition: all .15s; }
+  .modal-btn-cancel:hover { border-color: #7c3aed; color: #7c3aed; }
+  .modal-btn-send { flex: 2; padding: 11px; border-radius: 10px; background: #7c3aed; color: #fff; border: none; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; font-family: inherit; transition: all .15s; }
+  .modal-btn-send:hover { background: #6D28D9; box-shadow: 0 4px 16px rgba(124,58,237,.3); }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    .profile-container { padding: 16px 14px 48px; }
+    .skills-two-col { grid-template-columns: 1fr; }
+    .profile-tabs { overflow-x: auto; }
+    .ptab { font-size: 12px; padding: 9px 6px; }
+    .profile-stats { padding: 16px; }
+    .pstat-num { font-size: 22px; }
+    .profile-name { font-size: 19px; }
+  }
+</style>
+
+<!-- ══════════════════════════════
+     SWAP MODAL
+════════════════════════════════ -->
+<div class="modal-backdrop" id="swapModal" onclick="closeSwapModal(event)">
+  <div class="swap-modal">
+    <button class="modal-close" onclick="closeSwapModal(null, true)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+    <h2 class="modal-title">Request a Swap</h2>
+    <p class="modal-sub">Sending request to <strong id="modalUserName"></strong></p>
+    <form action="/swaps/send" method="POST" id="swapForm">
+      <input type="hidden" name="receiverId"    id="modalReceiverId"/>
+      <input type="hidden" name="skillsOffered" id="skillsOfferedHidden"/>
+      <input type="hidden" name="skillsWanted"  id="skillsWantedHidden"/>
+      <div class="modal-field">
+        <label class="modal-label">Skills you're offering</label>
+        <div class="modal-tag-wrap" id="offeredWrap" onclick="document.getElementById('offeredTagInput').focus()">
+          <input type="text" id="offeredTagInput" class="modal-tag-input" placeholder="Type a skill, press Enter…"/>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Skills you want to learn</label>
+        <div class="modal-tag-wrap" id="wantedWrap" onclick="document.getElementById('wantedTagInput').focus()">
+          <input type="text" id="wantedTagInput" class="modal-tag-input" placeholder="Type a skill, press Enter…"/>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Message <span class="modal-opt">(optional)</span></label>
+        <textarea name="message" class="modal-textarea" placeholder="Tell them why you'd be a great swap partner…" rows="3"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn-cancel" onclick="closeSwapModal(null,true)">Cancel</button>
+        <button type="submit" class="modal-btn-send">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+            <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+          </svg>
+          Send Request
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.ptab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.ptab').forEach(function(t){ t.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+      this.classList.add('active');
+      var panel = document.getElementById('tab-' + this.dataset.tab);
+      if (panel) panel.classList.add('active');
+    });
+  });
+
+  var offeredTags = [];
+  var wantedTags  = [];
+
+  function openSwapModal(userId, userName, offeredStr, wantedStr) {
+    document.getElementById('modalReceiverId').value = userId;
+    document.getElementById('modalUserName').textContent = userName;
+    offeredTags = []; wantedTags = [];
+    clearWrap('offeredWrap', 'offeredTagInput');
+    clearWrap('wantedWrap',  'wantedTagInput');
+    if (offeredStr) {
+      offeredStr.split(',').map(function(s){ return s.trim(); }).filter(Boolean).forEach(function(s) {
+        addTag(s, offeredTags, 'offeredWrap', 'offeredTagInput', 'mtag-offer');
+      });
+    }
+    document.getElementById('swapModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function(){ document.getElementById('offeredTagInput').focus(); }, 100);
+  }
+
+  function closeSwapModal(e, force) {
+    if (force || (e && e.target === document.getElementById('swapModal'))) {
+      document.getElementById('swapModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+
+  function clearWrap(wrapId, inputId) {
+    document.getElementById(wrapId).querySelectorAll('.mtag').forEach(function(t){ t.remove(); });
+    document.getElementById(inputId).value = '';
+  }
+
+  function addTag(value, list, wrapId, inputId, cls) {
+    var val = value.trim().replace(/,+$/, '');
+    if (!val || list.indexOf(val) !== -1) return;
+    list.push(val);
+    var wrap  = document.getElementById(wrapId);
+    var input = document.getElementById(inputId);
+    var tag   = document.createElement('span');
+    tag.className = 'mtag ' + cls;
+    var lname = list === offeredTags ? 'offeredTags' : 'wantedTags';
+    tag.innerHTML = val + ' <button type="button" class="mtag-remove" onclick="removeTag(\'' +
+      val.replace(/'/g,"\\'") + '\',\'' + lname + '\',this)">×</button>';
+    wrap.insertBefore(tag, input);
+    input.value = '';
+  }
+
+  function removeTag(val, listName, btn) {
+    var list = listName === 'offeredTags' ? offeredTags : wantedTags;
+    var idx  = list.indexOf(val);
+    if (idx > -1) list.splice(idx, 1);
+    btn.parentElement.remove();
+  }
+
+  function setupTagInput(inputId, wrapId, list, cls) {
+    var input = document.getElementById(inputId);
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(input.value, list, wrapId, inputId, cls); }
+      if (e.key === 'Backspace' && !input.value && list.length) {
+        var last  = list[list.length - 1];
+        var lname = list === offeredTags ? 'offeredTags' : 'wantedTags';
+        var lastBtn = document.getElementById(wrapId).querySelector('.mtag:last-of-type .mtag-remove');
+        if (lastBtn) removeTag(last, lname, lastBtn);
+      }
+    });
+    input.addEventListener('blur', function() {
+      if (input.value.trim()) addTag(input.value, list, wrapId, inputId, cls);
+    });
+  }
+
+  setupTagInput('offeredTagInput', 'offeredWrap', offeredTags, 'mtag-offer');
+  setupTagInput('wantedTagInput',  'wantedWrap',  wantedTags,  'mtag-want');
+
+  document.getElementById('swapForm').addEventListener('submit', function(e) {
+    var oInput = document.getElementById('offeredTagInput');
+    var wInput = document.getElementById('wantedTagInput');
+    if (oInput.value.trim()) addTag(oInput.value, offeredTags, 'offeredWrap', 'offeredTagInput', 'mtag-offer');
+    if (wInput.value.trim()) addTag(wInput.value, wantedTags,  'wantedWrap',  'wantedTagInput',  'mtag-want');
+    if (offeredTags.length === 0 && wantedTags.length === 0) {
+      e.preventDefault();
+      alert('Please add at least one skill you offer or want to learn.');
+      return;
+    }
+    document.getElementById('skillsOfferedHidden').value = offeredTags.join(',');
+    document.getElementById('skillsWantedHidden').value  = wantedTags.join(',');
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeSwapModal(null, true);
+  });
+</script>
+
+

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/header', { title: 'Review Submitted' }) %>
+<body>
+<%- include('../partials/navbar', { activePage: 'explore' }) %>
+<%- include('../partials/topbar') %>
+
+<style>
+  .grs-page { padding-top: 64px; min-height: 100vh; background: var(--bg); }
+  .grs-container { max-width: 520px; margin: 0 auto; padding: 60px 24px 80px; text-align: center; }
+  .grs-icon {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+  }
+  .grs-icon svg { width: 36px; height: 36px; color: #059669; }
+  .grs-container h1 {
+    font-family: var(--font-display); font-size: 24px; font-weight: 800;
+    color: var(--text); margin-bottom: 8px;
+  }
+  .grs-container .sub {
+    font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 32px;
+  }
+  .grs-host {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-bottom: 32px;
+  }
+  .grs-host img {
+    width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+  }
+  .grs-host .fb {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: #fff; font-weight: 700; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .grs-host span { font-size: 14px; font-weight: 600; color: var(--text); }
+  .grs-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+</style>
+
+<div class="grs-page">
+  <div class="grs-container">
+    <div class="grs-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    </div>
+    <h1>Review Submitted!</h1>
+    <p class="sub">Thanks for reviewing the session hosted by <strong><%= host.name %></strong>.<br>Your feedback helps the SkillSwap community grow.</p>
+
+    <div class="grs-host">
+      <% if (host.profilePic) { %>
+        <img src="<%= host.profilePic %>" alt="<%= host.name %>"/>
+      <% } else { %>
+        <div class="fb"><%= host.name.charAt(0).toUpperCase() %></div>
+      <% } %>
+      <span><%= host.name %></span>
+    </div>
+
+    <div class="grs-actions">
+      <a href="/dashboard" class="btn-sc-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:7px;padding:11px 24px;border-radius:50px;font-size:13px;font-weight:700;font-family:inherit;background:var(--brand);color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.3);transition:all .2s;border:none;cursor:pointer;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        Go to Dashboard
+      </a>
+      <a href="/profile" class="btn-sc-secondary" style="text-decoration:none;display:inline-flex;align-items:center;gap:7px;padding:11px 24px;border-radius:50px;font-size:13px;font-weight:700;font-family:inherit;background:var(--surface);color:var(--text);border:1.5px solid var(--border);transition:all .2s;cursor:pointer;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+        Your Profile
+      </a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

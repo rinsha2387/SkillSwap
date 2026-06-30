@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>You're in! — SkillSwap</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5f3ff;
+      font-family: 'DM Sans', sans-serif;
+      padding: 24px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border-radius: 28px;
+      padding: 48px 40px 40px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(124, 58, 237, 0.10);
+
+      /* pop-in animation */
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.88) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* ── Icon ── */
+    .icon-wrap {
+      width: 88px; height: 88px;
+      background: #7c3aed;
+      border-radius: 26px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 28px;
+      box-shadow: 0 8px 24px rgba(124,58,237,0.35);
+      animation: iconPop 0.6s 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes iconPop {
+      from { opacity: 0; transform: scale(0.6); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .icon-wrap svg { color: #fff; }
+
+    /* ── Heading ── */
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      color: #1e1b4b;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #6b7280;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .subtitle strong { color: #1e1b4b; font-weight: 600; }
+
+    /* ── Skills card ── */
+    .skills-box {
+      background: #fafafa;
+      border: 1.5px solid #ede9fe;
+      border-radius: 16px;
+      padding: 20px 22px;
+      margin: 28px 0;
+      text-align: left;
+      animation: fadeUp 0.5s 0.3s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .skills-section { margin-bottom: 16px; }
+    .skills-section:last-child { margin-bottom: 0; }
+
+    .skills-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag {
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .tag-teach {
+      background: #ede9fe;
+      color: #6d28d9;
+    }
+    .tag-learn {
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    /* ── Button ── */
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: #7c3aed;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 18px rgba(124,58,237,0.35);
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      animation: fadeUp 0.5s 0.45s ease both;
+    }
+    .btn:hover {
+      background: #6d28d9;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(124,58,237,0.4);
+    }
+    .btn:active { transform: translateY(0); }
+
+    .hint {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #9ca3af;
+      animation: fadeUp 0.5s 0.55s ease both;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+
+    <!-- Icon -->
+    <div class="icon-wrap">
+      <svg width="42" height="42" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+
+    <!-- Heading -->
+    <h1>You're in! 🎉</h1>
+    <p class="subtitle">
+      Welcome to SkillSwap, <strong><%= user.name %></strong>!<br/>
+      Your account has been verified and your profile is ready.
+    </p>
+
+    <!-- Skills summary -->
+    <div class="skills-box">
+      <div class="skills-section">
+        <p class="skills-label">I can teach</p>
+        <div class="tags">
+          <% user.skillsOffered.forEach(skill => { %>
+            <span class="tag tag-teach"><%= skill %></span>
+          <% }) %>
+        </div>
+      </div>
+
+      <div class="skills-section">
+        <p class="skills-label">I want to learn</p>
+        <div class="tags">
+          <% user.skillsWanted.forEach(skill => { %>
+            <span class="tag tag-learn"><%= skill %></span>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <a href="/dashboard" class="btn">Explore SkillSwap →</a>
+    <p class="hint">You can edit your profile anytime from your dashboard.</p>
+
+  </div>
+
+</body>
+</html>

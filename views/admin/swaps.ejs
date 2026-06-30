@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skill Swaps - SkillSwap Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <%- include('../partials/adminSidebar', { activePage: 'swaps' }) %>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', Arial, sans-serif; background: #eeeaf8; min-height: 100vh; display: flex; }
+
+    
+
+    /* ── Main ── */
+    .main { margin-left: 240px; flex: 1; padding: 32px 28px; min-height: 100vh; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .topbar-left h1 { font-size: 22px; font-weight: 700; color: #1a1340; }
+    .topbar-left p { font-size: 13px; color: #9b94c4; margin-top: 2px; }
+    .admin-badge { display: flex; align-items: center; gap: 10px; background: white; border: 1px solid #e5e0f5; border-radius: 50px; padding: 6px 16px 6px 6px; }
+    .admin-avatar { width: 32px; height: 32px; background: #6c63ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; }
+    .admin-badge span { font-size: 13px; font-weight: 600; color: #1a1340; }
+
+    /* ── Stat Cards ── */
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; margin-bottom: 28px; }
+    .card { background: white; border-radius: 16px; padding: 20px 22px; border: 1px solid #ede8ff; box-shadow: 0 2px 10px rgba(108,99,255,.06); }
+    .card-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+    .card-icon svg { width: 20px; height: 20px; fill: none; stroke-width: 2; }
+    .card-icon.purple { background: #f0ebff; } .card-icon.purple svg { stroke: #6c63ff; }
+    .card-icon.green  { background: #edfaf3; } .card-icon.green  svg { stroke: #22c55e; }
+    .card-icon.amber  { background: #fffbeb; } .card-icon.amber  svg { stroke: #f59e0b; }
+    .card-icon.blue   { background: #e0f2fe; } .card-icon.blue   svg { stroke: #0284c7; }
+    .card-label { font-size: 11px; font-weight: 600; color: #9b94c4; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+    .card-value { font-size: 28px; font-weight: 700; color: #1a1340; }
+
+    /* ── Table Card ── */
+    .table-card { background: white; border-radius: 16px; padding: 22px 24px; border: 1px solid #ede8ff; box-shadow: 0 2px 10px rgba(108,99,255,.06); }
+    .table-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+    .table-topbar h3 { font-size: 15px; font-weight: 600; color: #1a1340; }
+    .table-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .search-box { display: flex; align-items: center; gap: 8px; border: 1px solid #e5e0f5; border-radius: 10px; padding: 8px 14px; background: #faf9ff; }
+    .search-box svg { width: 15px; height: 15px; stroke: #b0a8d8; fill: none; flex-shrink: 0; }
+    .search-box input { border: none; outline: none; background: transparent; font-size: 13px; color: #1a1340; font-family: 'Inter', Arial, sans-serif; width: 180px; }
+    .search-box input::placeholder { color: #b0a8d8; }
+    .filter-tabs { display: flex; gap: 6px; }
+    .ftab { padding: 6px 14px; font-size: 12px; font-weight: 500; border-radius: 50px; cursor: pointer; border: 1px solid #e5e0f5; background: transparent; color: #9b94c4; font-family: 'Inter', Arial, sans-serif; transition: all .15s; }
+    .ftab:hover { background: #f3f0ff; color: #6c63ff; border-color: #c9c1f5; }
+    .ftab.active { background: #6c63ff; color: white; border-color: #6c63ff; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 600; color: #b0a8d8; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid #f0ebff; }
+    tbody td { padding: 12px; border-bottom: 1px solid #f9f7ff; color: #1a1340; vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #faf9ff; }
+
+    .user-cell { display: flex; align-items: center; gap: 8px; }
+    .u-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+    .u-name  { font-weight: 500; font-size: 13px; color: #1a1340; }
+    .u-email { font-size: 11px; color: #9b94c4; }
+
+    .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 50px; font-size: 11px; font-weight: 600; }
+    .badge-pending  { background: #fffbeb; color: #d97706; }
+    .badge-accepted { background: #edfaf3; color: #16a34a; }
+    .badge-completed{ background: #e0f2fe; color: #0284c7; }
+    .badge-rejected { background: #fff0f0; color: #dc2626; }
+
+    .skill-tag { display: inline-block; padding: 2px 8px; border-radius: 50px; font-size: 11px; font-weight: 600; background: #f0ebff; color: #6c63ff; margin: 1px; }
+    .swap-arrow { color: #b0a8d8; font-size: 14px; }
+
+    .empty-row td { text-align: center; padding: 36px; color: #b0a8d8; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+
+
+<!-- ── Main ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Skill Swaps</h1>
+      <p>All swap requests across the platform</p>
+    </div>
+    <div class="admin-badge">
+      <div class="admin-avatar">A</div>
+      <span>Admin</span>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon purple">
+        <svg viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+      </div>
+      <div class="card-label">Total Swaps</div>
+      <div class="card-value"><%= totalSwaps || 0 %></div>
+    </div>
+    <div class="card">
+      <div class="card-icon amber">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="card-label">Pending</div>
+      <div class="card-value"><%= pendingSwaps || 0 %></div>
+    </div>
+    <div class="card">
+      <div class="card-icon green">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="card-label">Accepted</div>
+      <div class="card-value"><%= acceptedSwaps || 0 %></div>
+    </div>
+    <div class="card">
+      <div class="card-icon blue">
+        <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div class="card-label">Completed</div>
+      <div class="card-value"><%= completedSwaps || 0 %></div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-topbar">
+      <h3>All Swap Requests</h3>
+      <div class="table-controls">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="searchInput" placeholder="Search by name or skill..."/>
+        </div>
+        <div class="filter-tabs">
+          <button class="ftab active" onclick="filterSwaps('all',this)">All</button>
+          <button class="ftab" onclick="filterSwaps('pending',this)">Pending</button>
+          <button class="ftab" onclick="filterSwaps('completed',this)">Completed</button>
+          <button class="ftab" onclick="filterSwaps('rejected',this)">Rejected</button>
+        </div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Requester</th>
+          <th>Receiver</th>
+          <th>Skills Exchanged</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="swapsTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const swapsData = <%- JSON.stringify(swaps || []) %>;
+  let currentFilter = 'all';
+  let searchTerm = '';
+
+  const avatarColors = [
+    { bg:'#f0ebff', tc:'#6c63ff' }, { bg:'#edfaf3', tc:'#16a34a' },
+    { bg:'#fffbeb', tc:'#d97706' }, { bg:'#e0f2fe', tc:'#0284c7' },
+    { bg:'#fce7f3', tc:'#be185d' }, { bg:'#fff0f0', tc:'#dc2626' }
+  ];
+
+  function badgeClass(status) {
+    return { pending:'badge-pending', accepted:'badge-accepted', completed:'badge-completed', rejected:'badge-rejected' }[status] || 'badge-pending';
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('swapsTable');
+    const filtered = swapsData.filter(s => {
+      const matchFilter = currentFilter === 'all' || s.status === currentFilter;
+      const rName  = (s.requester?.name || '').toLowerCase();
+      const rcName = (s.receiver?.name  || '').toLowerCase();
+      const skills = [...(s.skillsOffered||[]), ...(s.skillsWanted||[])].join(' ').toLowerCase();
+      return matchFilter && (rName.includes(searchTerm) || rcName.includes(searchTerm) || skills.includes(searchTerm));
+    });
+
+    if (!filtered.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No swaps found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map((s, i) => {
+      const col  = avatarColors[i % avatarColors.length];
+      const col2 = avatarColors[(i + 2) % avatarColors.length];
+      const rName  = s.requester?.name  || 'Unknown';
+      const rcName = s.receiver?.name   || 'Unknown';
+      const rInit  = rName.charAt(0).toUpperCase();
+      const rcInit = rcName.charAt(0).toUpperCase();
+      const date   = s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '—';
+      const offeredTags = (s.skillsOffered || []).map(sk => `<span class="skill-tag">${sk}</span>`).join('') || '—';
+      const wantedTags  = (s.skillsWanted  || []).map(sk => `<span class="skill-tag" style="background:#e0f2fe;color:#0284c7">${sk}</span>`).join('') || '—';
+
+      return `<tr>
+        <td>
+          <div class="user-cell">
+            <div class="u-avatar" style="background:${col.bg};color:${col.tc}">${rInit}</div>
+            <div>
+              <div class="u-name">${rName}</div>
+              <div class="u-email">${s.requester?.email || ''}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="user-cell">
+            <div class="u-avatar" style="background:${col2.bg};color:${col2.tc}">${rcInit}</div>
+            <div>
+              <div class="u-name">${rcName}</div>
+              <div class="u-email">${s.receiver?.email || ''}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            ${offeredTags}
+            <span class="swap-arrow">⇄</span>
+            ${wantedTags}
+          </div>
+        </td>
+        <td><span class="badge ${badgeClass(s.status)}">${s.status}</span></td>
+        <td style="color:#9b94c4">${date}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function filterSwaps(f, el) {
+    currentFilter = f;
+    document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    renderTable();
+  }
+
+  document.getElementById('searchInput').addEventListener('input', function() {
+    searchTerm = this.value.toLowerCase();
+    renderTable();
+  });
+
+  renderTable();
+</script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<% const active = (typeof activePage !== 'undefined') ? activePage : ''; %>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@400;500&display=swap');
+
+  :root {
+    --brand:        #7c3aed;
+    --brand-hover:  #6d28d9;
+    --brand-light:  #ede9fe;
+    --nav-bg:       #ffffff;
+    --nav-border:   #f0eeff;
+    --text-main:    #1e1b4b;
+    --text-muted:   #6b7280;
+    --icon-size:    22px;
+    --sidebar-w:    240px;
+    --sidebar-w-md: 72px;
+    --bottom-h:     64px;
+    --radius:       14px;
+    --transition:   0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Sidebar ── */
+  .sk-sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    width: var(--sidebar-w);
+    background: var(--nav-bg);
+    border-right: 1.5px solid var(--nav-border);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 16px 24px;
+    z-index: 100;
+    font-family: 'DM Sans', sans-serif;
+    box-shadow: 4px 0 24px rgba(124,58,237,0.06);
+    overflow: hidden;
+  }
+
+  /* ── Brand ── */
+  .sk-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 4px;
+    margin-bottom: 36px;
+    text-decoration: none;
+  }
+  .sk-brand-icon {
+    width: 42px; height: 42px;
+    background: var(--brand);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(124,58,237,0.35);
+  }
+  .sk-brand-icon svg { color: #fff; }
+  .sk-brand-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    transition: opacity var(--transition);
+  }
+
+  /* ── Nav list ── */
+  .sk-nav {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+  .sk-nav li { position: relative; }
+  .sk-nav a {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 14px;
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 15px;
+    font-weight: 500;
+    transition: background var(--transition), color var(--transition);
+    white-space: nowrap;
+  }
+  .sk-nav a:hover { background: var(--brand-light); color: var(--brand); }
+  .sk-nav a.active {
+    background: var(--brand);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(124,58,237,0.3);
+  }
+  .sk-nav a svg { width: var(--icon-size); height: var(--icon-size); flex-shrink: 0; }
+
+  /* ── Logout ── */
+  .sk-logout { border-top: 1.5px solid var(--nav-border); padding-top: 16px; position: relative; }
+  .sk-logout a {
+    display: flex; align-items: center; gap: 14px;
+    padding: 11px 14px; border-radius: var(--radius);
+    text-decoration: none; color: var(--text-muted);
+    font-size: 15px; font-weight: 500;
+    transition: background var(--transition), color var(--transition);
+    white-space: nowrap;
+  }
+  .sk-logout a:hover { background: #fef2f2; color: #ef4444; }
+  .sk-logout a svg { width: var(--icon-size); height: var(--icon-size); flex-shrink: 0; }
+
+  /* ── Tooltip (tablet) ── */
+  .sk-tooltip {
+    display: none;
+    position: absolute;
+    left: calc(var(--sidebar-w-md) + 4px);
+    top: 50%; transform: translateY(-50%);
+    background: var(--text-main); color: #fff;
+    font-size: 13px; font-weight: 500;
+    padding: 6px 12px; border-radius: 8px;
+    white-space: nowrap; pointer-events: none; z-index: 200;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .sk-tooltip::before {
+    content: '';
+    position: absolute;
+    right: 100%; top: 50%; transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-right-color: var(--text-main);
+  }
+  .sk-logout-tooltip {
+    display: none;
+    position: absolute;
+    left: calc(var(--sidebar-w-md) + 4px);
+    top: 50%; transform: translateY(-50%);
+    background: var(--text-main); color: #fff;
+    font-size: 13px; font-weight: 500;
+    padding: 6px 12px; border-radius: 8px;
+    white-space: nowrap; pointer-events: none; z-index: 200;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .sk-logout-tooltip::before {
+    content: '';
+    position: absolute;
+    right: 100%; top: 50%; transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-right-color: var(--text-main);
+  }
+
+  /* ── TABLET (768px–1023px): icon-only sidebar ── */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .sk-sidebar { width: var(--sidebar-w-md); padding: 24px 12px 20px; align-items: center; }
+    .sk-brand { justify-content: center; margin-bottom: 32px; }
+    .sk-brand-name { opacity: 0; width: 0; overflow: hidden; }
+    .sk-nav a { justify-content: center; padding: 12px; gap: 0; }
+    .sk-nav a span { opacity: 0; width: 0; overflow: hidden; }
+    .sk-nav li:hover .sk-tooltip { display: block; }
+    .sk-logout a { justify-content: center; padding: 12px; gap: 0; }
+    .sk-logout a span { opacity: 0; width: 0; overflow: hidden; }
+    .sk-logout:hover .sk-logout-tooltip { display: block; }
+    body { padding-left: var(--sidebar-w-md); }
+  }
+
+  /* ── DESKTOP (≥1024px) ── */
+  @media (min-width: 1024px) {
+    body { padding-left: var(--sidebar-w); }
+  }
+
+  /* ── MOBILE (<768px): hide sidebar ── */
+  @media (max-width: 767px) {
+    .sk-sidebar { display: none; }
+    .sk-bottom-nav { display: flex; }
+    body { padding-left: 0; padding-bottom: var(--bottom-h); }
+  }
+  @media (min-width: 768px) {
+    .sk-bottom-nav { display: none; }
+  }
+
+  /* ── Bottom Nav ── */
+  .sk-bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: var(--bottom-h);
+    background: var(--nav-bg);
+    border-top: 1.5px solid var(--nav-border);
+    justify-content: space-around;
+    align-items: center;
+    z-index: 100;
+    box-shadow: 0 -4px 20px rgba(124,58,237,0.08);
+    padding: 0 8px;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .sk-bottom-nav a {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    flex: 1; height: 100%;
+    text-decoration: none; color: var(--text-muted);
+    border-radius: 12px;
+    transition: color var(--transition);
+    position: relative;
+  }
+  .sk-bottom-nav a svg { width: 24px; height: 24px; transition: transform var(--transition); }
+  .sk-bottom-nav a.active { color: var(--brand); }
+  .sk-bottom-nav a.active svg { transform: translateY(-2px); }
+  .sk-bottom-nav a.active::after {
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    width: 4px; height: 4px;
+    background: var(--brand);
+    border-radius: 50%;
+  }
+  .sk-bottom-nav a:hover { color: var(--brand); }
+</style>
+
+<!-- SIDEBAR -->
+<nav class="sk-sidebar" aria-label="Main navigation">
+  <a href="/" class="sk-brand">
+    <div class="sk-brand-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+      </svg>
+    </div>
+    <span class="sk-brand-name">SkillSwap</span>
+  </a>
+
+  <ul class="sk-nav" role="list">
+    <li>
+      <a href="/dashboard" class="<%= active === 'home' ? 'active' : '' %>" aria-label="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span>Home</span>
+      </a>
+      <span class="sk-tooltip">Home</span>
+    </li>
+    <li>
+      <a href="/explore" class="<%= active === 'explore' ? 'active' : '' %>" aria-label="Explore">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+        </svg>
+        <span>Explore</span>
+      </a>
+      <span class="sk-tooltip">Explore</span>
+    </li>
+    <li>
+      <a href="/swaps/requests" class="<%= active === 'swaps' ? 'active' : '' %>" aria-label="Swaps">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+        </svg>
+        <span>Swaps</span>
+      </a>
+      <span class="sk-tooltip">Swaps</span>
+    </li>
+    <li>
+      <a href="/chats" class="<%= active === 'chat' ? 'active' : '' %>" aria-label="Chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
+        <span>Chat</span>
+      </a>
+      <span class="sk-tooltip">Chat</span>
+    </li>
+    <li>
+      <a href="/profile" class="<%= active === 'profile' ? 'active' : '' %>" aria-label="Profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+        <span>Profile</span>
+      </a>
+      <span class="sk-tooltip">Profile</span>
+    </li>
+  </ul>
+
+  <div class="sk-logout">
+    <span class="sk-logout-tooltip">Logout</span>
+    <a href="/auth/logout" aria-label="Logout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      <span>Logout</span>
+    </a>
+  </div>
+</nav>
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="sk-bottom-nav" aria-label="Mobile navigation">
+  <a href="/dashboard" class="<%= active === 'home' ? 'active' : '' %>" aria-label="Home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  </a>
+  <a href="/explore" class="<%= active === 'explore' ? 'active' : '' %>" aria-label="Explore">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+    </svg>
+  </a>
+  <a href="/swaps/requests" class="<%= active === 'swaps' ? 'active' : '' %>" aria-label="Swaps">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+    </svg>
+  </a>
+  <a href="/chats" class="<%= active === 'chat' ? 'active' : '' %>" aria-label="Chat">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+    </svg>
+  </a>
+  <a href="/profile" class="<%= active === 'profile' ? 'active' : '' %>" aria-label="Profile">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    </svg>
+  </a>
+</nav>

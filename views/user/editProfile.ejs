@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/header') %>
+<body>
+
+<%- include('../partials/navbar') %>
+<%- include('../partials/topbar') %>
+
+<div class="page-wrap">
+<div class="edit-container">
+
+  <!-- Page Title -->
+  <div class="edit-page-head">
+    <a href="/profile" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Back to Profile
+    </a>
+    <h1 class="edit-page-title">Edit Profile</h1>
+  </div>
+
+  <!-- Server error box (same style as profile-setup) -->
+  <% if (typeof errors !== 'undefined' && errors && errors.length > 0) { %>
+  <div class="error-box">
+    <div class="error-box-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" width="12" height="12">
+        <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+    <div class="error-box-content">
+      <strong>Please fix the following before saving:</strong>
+      <ul><% errors.forEach(function(err){ %><li><%= err %></li><% }); %></ul>
+    </div>
+  </div>
+  <% } %>
+
+  <form action="/profile/edit" method="POST" id="editForm" enctype="multipart/form-data">
+    <!-- Hidden fields for tag inputs and days -->
+    <input type="hidden" name="skillsOffered"      id="skillsOfferedHidden">
+    <input type="hidden" name="skillsWanted"        id="skillsWantedHidden">
+    <input type="hidden" name="availability[days]"  id="daysHidden">
+
+    <!-- Progress tabs -->
+    <div class="edit-steps">
+      <button type="button" class="estep active" data-step="1" onclick="switchStep(1)">
+        <span class="estep-num">1</span> Basic Info
+      </button>
+      <div class="estep-line"></div>
+      <button type="button" class="estep" data-step="2" onclick="switchStep(2)">
+        <span class="estep-num">2</span> Skills
+      </button>
+      <div class="estep-line"></div>
+      <button type="button" class="estep" data-step="3" onclick="switchStep(3)">
+        <span class="estep-num">3</span> Availability
+      </button>
+      <div class="estep-line"></div>
+      <button type="button" class="estep" data-step="4" onclick="switchStep(4)">
+        <span class="estep-num">4</span> Socials
+      </button>
+    </div>
+
+    <div class="card">
+
+      <!-- ══ STEP 1: Basic Info ══ -->
+      <div class="card-step active" id="step1">
+        <div class="step-heading">
+          <h2>👋 Basic Information</h2>
+          <p>Update your name, photo, bio and location.</p>
+        </div>
+
+        <div class="form-grid">
+
+          <!-- Photo upload -->
+          <div class="form-group full">
+            <label class="form-label">Profile Photo</label>
+            <div class="photo-upload-area">
+              <div class="photo-preview <%= (user && user.avatar) ? 'has-image' : '' %>" id="photoPreview">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#c9c1f5" stroke-width="1.5" width="28" height="28">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                <img id="photoImg"
+                  src="<%= (user && user.avatar) ? user.avatar : '' %>"
+                  alt="Preview"
+                  style="<%= (user && user.avatar) ? 'display:block' : 'display:none' %>">
+              </div>
+              <div class="photo-upload-info">
+                <h4>Update your photo</h4>
+                <p>JPG or PNG, max 5MB. Leave blank to keep current photo.</p>
+                <label class="upload-btn" for="photoInput">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#6c63ff" stroke-width="2" width="13" height="13">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span id="uploadBtnText">Choose Photo</span>
+                </label>
+                <input type="file" id="photoInput" name="avatar" accept="image/*">
+              </div>
+            </div>
+          </div>
+
+          <!-- Name -->
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" name="name" id="nameInput" class="form-input"
+              placeholder="e.g. Rinsha K"
+              value="<%= (typeof formData !== 'undefined' && formData && formData.name) ? formData.name : (user && user.name ? user.name : '') %>">
+          </div>
+
+          <!-- Location -->
+          <div class="form-group">
+            <label class="form-label">Location</label>
+            <input type="text" name="location" id="locationInput" class="form-input"
+              placeholder="e.g. Kerala, India"
+              value="<%= (typeof formData !== 'undefined' && formData && formData.location) ? formData.location : (user && user.location ? user.location : '') %>">
+          </div>
+
+          <!-- Bio -->
+          <div class="form-group full">
+            <label class="form-label">Bio</label>
+            <textarea name="bio" id="bioInput" class="form-textarea"
+              placeholder="Tell others what you're passionate about..."><%= (typeof formData !== 'undefined' && formData && formData.bio) ? formData.bio : (user && user.bio ? user.bio : '') %></textarea>
+          </div>
+
+        </div>
+
+        <!-- Step toast -->
+        <div class="step-error-toast" id="toast1">
+          <div class="step-error-toast-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" width="10" height="10">
+              <line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/>
+            </svg>
+          </div>
+          <ul id="toastList1"></ul>
+        </div>
+
+        <div class="step-actions">
+          <span class="step-counter">Step 1 of 4</span>
+          <button type="button" class="btn-next" onclick="goTo(2)">
+            Next
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ STEP 2: Skills ══ -->
+      <div class="card-step" id="step2">
+        <div class="step-heading">
+          <h2>🧠 Your Skills</h2>
+          <p>Update skills you can teach and skills you want to learn. Press Enter or comma to add.</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group full">
+            <label class="form-label">Skills You're Offering</label>
+            <div class="tag-input-wrap" id="offeredWrap" onclick="document.getElementById('offeredInput').focus()">
+              <input type="text" id="offeredInput" class="tag-text-input" placeholder="Type a skill and press Enter...">
+            </div>
+            <span class="form-hint">e.g. JavaScript, UI Design, Python</span>
+          </div>
+
+          <div class="form-group full">
+            <label class="form-label">Skills You Want to Learn *</label>
+            <div class="tag-input-wrap" id="wantedWrap" onclick="document.getElementById('wantedInput').focus()">
+              <input type="text" id="wantedInput" class="tag-text-input" placeholder="Type a skill and press Enter...">
+            </div>
+            <span class="form-hint">e.g. Video Editing, Node.js, Public Speaking</span>
+          </div>
+        </div>
+
+        <div class="step-error-toast" id="toast2">
+          <div class="step-error-toast-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" width="10" height="10">
+              <line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/>
+            </svg>
+          </div>
+          <ul id="toastList2"></ul>
+        </div>
+
+        <div class="step-actions">
+          <button type="button" class="btn-back" onclick="goBack(1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Back
+          </button>
+          <div style="display:flex;align-items:center;gap:14px">
+            <span class="step-counter">Step 2 of 4</span>
+            <button type="button" class="btn-next" onclick="goTo(3)">
+              Next
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ STEP 3: Availability ══ -->
+      <div class="card-step" id="step3">
+        <div class="step-heading">
+          <h2>📅 Availability</h2>
+          <p>Update when you're free for skill swap sessions.</p>
+        </div>
+
+        <div class="form-group" style="margin-bottom:18px">
+          <label class="form-label">Available Days</label>
+          <div class="days-grid">
+            <% ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].forEach(function(day){ %>
+              <button type="button" class="day-btn" data-day="<%= day %>" onclick="toggleDay(this)">
+                <%= day.slice(0,3).toUpperCase() %>
+              </button>
+            <% }) %>
+          </div>
+        </div>
+
+        <div class="time-grid">
+          <div class="form-group">
+            <label class="form-label">From Time</label>
+            <input type="time" name="availability[from]" id="fromTime" class="form-input"
+              value="<%= (typeof formData !== 'undefined' && formData && formData['availability[from]']) ? formData['availability[from]'] : (user && user.availability && user.availability.from ? user.availability.from : '09:00') %>">
+          </div>
+          <div class="form-group">
+            <label class="form-label">To Time</label>
+            <input type="time" name="availability[to]" id="toTime" class="form-input"
+              value="<%= (typeof formData !== 'undefined' && formData && formData['availability[to]']) ? formData['availability[to]'] : (user && user.availability && user.availability.to ? user.availability.to : '18:00') %>">
+          </div>
+        </div>
+
+        <div class="step-error-toast" id="toast3">
+          <div class="step-error-toast-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" width="10" height="10">
+              <line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/>
+            </svg>
+          </div>
+          <ul id="toastList3"></ul>
+        </div>
+
+        <div class="step-actions">
+          <button type="button" class="btn-back" onclick="goBack(2)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Back
+          </button>
+          <div style="display:flex;align-items:center;gap:14px">
+            <span class="step-counter">Step 3 of 4</span>
+            <button type="button" class="btn-next" onclick="goTo(4)">
+              Next
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ STEP 4: Socials ══ -->
+      <div class="card-step" id="step4">
+        <div class="step-heading">
+          <h2>🔗 Social Links</h2>
+          <p>Keep at least one social link — it builds trust with skill partners.</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group full">
+            <label class="form-label">GitHub</label>
+            <div class="social-input-row" id="githubRow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#b0a8d8" stroke-width="2" width="15" height="15">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/>
+              </svg>
+              <input type="text" name="github" placeholder="https://github.com/yourusername"
+                value="<%= (typeof formData !== 'undefined' && formData && formData.github) ? formData.github : (user && user.verifications && user.verifications.githubUrl ? user.verifications.githubUrl : '') %>">
+            </div>
+          </div>
+
+          <div class="form-group full">
+            <label class="form-label">LinkedIn</label>
+            <div class="social-input-row" id="linkedinRow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#b0a8d8" stroke-width="2" width="15" height="15">
+                <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/>
+                <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+              </svg>
+              <input type="text" name="linkedin" placeholder="https://linkedin.com/in/yourusername"
+                value="<%= (typeof formData !== 'undefined' && formData && formData.linkedin) ? formData.linkedin : (user && user.verifications && user.verifications.linkedinUrl ? user.verifications.linkedinUrl : '') %>">
+            </div>
+          </div>
+        </div>
+
+        <div class="step-error-toast" id="toast4">
+          <div class="step-error-toast-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" width="10" height="10">
+              <line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/>
+            </svg>
+          </div>
+          <ul id="toastList4"></ul>
+        </div>
+
+        <div class="step-actions">
+          <button type="button" class="btn-back" onclick="goBack(3)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Back
+          </button>
+          <div style="display:flex;align-items:center;gap:14px">
+            <span class="step-counter">Step 4 of 4</span>
+            <button type="button" class="btn-next btn-save" onclick="handleSave()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" width="14" height="14">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.card -->
+  </form>
+
+</div><!-- /edit-container -->
+</div><!-- /page-wrap -->
+
+<!-- ══════════════════════════════
+     STYLES  (same tokens as profile-setup)
+════════════════════════════════ -->
+<style>
+  .page-wrap       { padding-top: 64px; background: #eeeaf8; min-height: 100vh; }
+  .edit-container  { max-width: 680px; margin: 0 auto; padding: 32px 20px 60px; }
+
+  /* ── Page head ── */
+  .edit-page-head  { margin-bottom: 24px; }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 500; color: #9b94c4;
+    text-decoration: none; margin-bottom: 10px;
+    transition: color .15s;
+  }
+  .back-link:hover { color: #6c63ff; }
+  .edit-page-title { font-size: 22px; font-weight: 700; color: #1a1340; }
+
+  /* ── Error box (identical to profile-setup) ── */
+  .error-box {
+    background: #fff5f5; border: 1px solid #fca5a5; border-radius: 12px;
+    padding: 14px 18px; margin-bottom: 20px;
+    display: flex; gap: 12px; align-items: flex-start;
+    animation: slideDown .25s ease;
+  }
+  @keyframes slideDown {
+    from { opacity:0; transform:translateY(-8px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .error-box-icon {
+    flex-shrink: 0; width: 20px; height: 20px; background: #fee2e2;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .error-box-content strong { display: block; font-size: 13px; font-weight: 600; color: #dc2626; margin-bottom: 6px; }
+  .error-box ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+  .error-box ul li { font-size: 12px; color: #b91c1c; display: flex; align-items: flex-start; gap: 6px; }
+  .error-box ul li::before { content: '·'; font-size: 16px; line-height: 1; color: #fca5a5; flex-shrink: 0; }
+
+  /* ── Step tabs ── */
+  .edit-steps {
+    display: flex; align-items: center;
+    margin-bottom: 20px; background: #fff;
+    border: 1px solid #ede8ff; border-radius: 16px;
+    padding: 6px; gap: 2px;
+    box-shadow: 0 2px 12px rgba(124,58,237,.05);
+  }
+  .estep {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 9px 6px; border-radius: 12px;
+    font-size: 12px; font-weight: 600; color: #9b94c4;
+    background: transparent; border: none; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all .18s; white-space: nowrap;
+  }
+  .estep:hover  { color: #6c63ff; background: #f3f0ff; }
+  .estep.active { background: #fff; color: #1a1340; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  .estep-num {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #ede8ff; color: #6c63ff;
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .estep.active .estep-num { background: #6c63ff; color: #fff; }
+  .estep-line { width: 1px; height: 24px; background: #ede8ff; flex-shrink: 0; }
+
+  /* ── Card ── */
+  .card {
+    background: white; border-radius: 20px; padding: 32px;
+    border: 1px solid #ede8ff; box-shadow: 0 4px 24px rgba(108,99,255,.08);
+  }
+  .card-step { display: none; }
+  .card-step.active { display: block; }
+  .step-heading { margin-bottom: 24px; }
+  .step-heading h2 { font-size: 20px; font-weight: 700; color: #1a1340; margin-bottom: 4px; }
+  .step-heading p  { font-size: 13px; color: #9b94c4; }
+
+  /* ── Form elements (identical to profile-setup) ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-label { font-size: 11px; font-weight: 600; color: #9b94c4; text-transform: uppercase; letter-spacing: .06em; }
+  .form-input, .form-textarea {
+    border: 1px solid #e5e0f5; border-radius: 10px; padding: 10px 14px;
+    font-size: 13px; color: #1a1340; font-family: 'Inter', sans-serif;
+    background: #faf9ff; outline: none; transition: border .15s, background .15s; width: 100%;
+  }
+  .form-input:focus, .form-textarea:focus { border-color: #6c63ff; background: white; }
+  .form-textarea { resize: vertical; min-height: 90px; }
+  .form-hint { font-size: 11px; color: #b0a8d8; }
+  .form-input.input-error     { border-color: #fca5a5 !important; background: #fff5f5 !important; }
+  .form-textarea.input-error  { border-color: #fca5a5 !important; background: #fff5f5 !important; }
+  .tag-input-wrap.input-error { border-color: #fca5a5 !important; background: #fff5f5 !important; }
+  .social-input-row.input-error { border-color: #fca5a5 !important; background: #fff5f5 !important; }
+
+  /* ── Photo upload ── */
+  .photo-upload-area { display: flex; align-items: center; gap: 20px; }
+  .photo-preview {
+    width: 80px; height: 80px; border-radius: 50%; background: #f0ebff;
+    border: 2px dashed #c9c1f5; display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0; transition: border-color .2s;
+  }
+  .photo-preview img { width: 100%; height: 100%; object-fit: cover; display: none; }
+  .photo-preview.has-image { border-color: #6c63ff; }
+  .photo-preview.has-image img { display: block; }
+  .photo-preview.has-image svg { display: none; }
+  .photo-upload-info h4 { font-size: 14px; font-weight: 600; color: #1a1340; margin-bottom: 6px; }
+  .photo-upload-info p  { font-size: 12px; color: #9b94c4; margin-bottom: 10px; }
+  .upload-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+    border-radius: 10px; border: 1px dashed #c9c1f5; background: #faf9ff;
+    color: #6c63ff; font-size: 12px; font-weight: 500; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all .15s;
+  }
+  .upload-btn:hover { background: #f0ebff; border-color: #6c63ff; }
+  input[type="file"] { display: none; }
+
+  /* ── Tag input ── */
+  .tag-input-wrap {
+    border: 1px solid #e5e0f5; border-radius: 10px; padding: 8px 10px;
+    background: #faf9ff; display: flex; flex-wrap: wrap; gap: 6px;
+    min-height: 44px; cursor: text; transition: border .15s;
+  }
+  .tag-input-wrap:focus-within { border-color: #6c63ff; background: white; }
+  .tag { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 50px; font-size: 12px; font-weight: 500; }
+  .tag-offered { background: #f0ebff; color: #6c63ff; }
+  .tag-wanted  { background: #edfaf3; color: #16a34a; }
+  .tag-remove  { cursor: pointer; font-size: 14px; opacity: .6; background: none; border: none; color: inherit; padding: 0; }
+  .tag-remove:hover { opacity: 1; }
+  .tag-text-input {
+    border: none; outline: none; background: transparent;
+    font-size: 13px; color: #1a1340; font-family: 'Inter', sans-serif;
+    min-width: 120px; flex: 1;
+  }
+  .tag-text-input::placeholder { color: #c9c1f5; }
+
+  /* ── Availability ── */
+  .days-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .day-btn {
+    padding: 7px 14px; border-radius: 50px; font-size: 12px; font-weight: 500;
+    border: 1px solid #e5e0f5; background: transparent; color: #9b94c4;
+    cursor: pointer; font-family: 'Inter', sans-serif; transition: all .15s;
+  }
+  .day-btn:hover    { background: #f3f0ff; color: #6c63ff; border-color: #c9c1f5; }
+  .day-btn.selected { background: #6c63ff; color: white; border-color: #6c63ff; }
+  .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ── Social input ── */
+  .social-input-row {
+    display: flex; align-items: center; gap: 10px;
+    border: 1px solid #e5e0f5; border-radius: 10px; padding: 10px 14px;
+    background: #faf9ff; transition: border .15s;
+  }
+  .social-input-row:focus-within { border-color: #6c63ff; background: white; }
+  .social-input-row input {
+    border: none; outline: none; background: transparent;
+    font-size: 13px; color: #1a1340; font-family: 'Inter', sans-serif; width: 100%;
+  }
+  .social-input-row input::placeholder { color: #c9c1f5; }
+
+  /* ── Step toast ── */
+  .step-error-toast {
+    display: none; background: #fff5f5; border: 1px solid #fca5a5;
+    border-radius: 10px; padding: 10px 14px; margin-top: 16px;
+    gap: 8px; align-items: flex-start;
+  }
+  .step-error-toast.visible { display: flex; animation: slideDown .2s ease; }
+  .step-error-toast-icon {
+    flex-shrink: 0; width: 18px; height: 18px; background: #fee2e2;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  }
+  .step-error-toast ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+  .step-error-toast ul li { font-size: 12px; color: #b91c1c; }
+  .step-error-toast ul li::before { content: '· '; color: #fca5a5; }
+
+  /* ── Step actions ── */
+  .step-actions {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 28px; padding-top: 20px; border-top: 1px solid #f0ebff;
+  }
+  .step-counter { font-size: 12px; color: #b0a8d8; font-weight: 500; }
+  .btn-back {
+    display: flex; align-items: center; gap: 6px; padding: 10px 20px;
+    font-size: 13px; font-weight: 600; border-radius: 10px; cursor: pointer;
+    border: 1px solid #e5e0f5; background: transparent; color: #9b94c4;
+    font-family: 'Inter', sans-serif; transition: all .15s;
+  }
+  .btn-back:hover { background: #f3f0ff; color: #6c63ff; border-color: #c9c1f5; }
+  .btn-next {
+    display: flex; align-items: center; gap: 6px; padding: 10px 24px;
+    font-size: 13px; font-weight: 600; border-radius: 10px; cursor: pointer;
+    border: none; background: #6c63ff; color: white;
+    font-family: 'Inter', sans-serif; transition: background .15s;
+  }
+  .btn-next:hover { background: #574fd6; }
+  .btn-save { background: #22c55e; }
+  .btn-save:hover { background: #16a34a; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .form-grid   { grid-template-columns: 1fr; }
+    .form-group.full { grid-column: 1; }
+    .time-grid   { grid-template-columns: 1fr; }
+    .photo-upload-area { flex-direction: column; align-items: flex-start; }
+    .edit-steps  { overflow-x: auto; }
+    .estep span:not(.estep-num) { display: none; }
+  }
+</style>
+
+<!-- ══════════════════════════════
+     SCRIPT
+════════════════════════════════ -->
+<script>
+  /* ── Step navigation ── */
+  let currentStep = 1;
+
+  function switchStep(step) {
+    document.getElementById('step' + currentStep).classList.remove('active');
+    document.querySelectorAll('.estep').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('step' + step).classList.add('active');
+    document.querySelector('.estep[data-step="' + step + '"]').classList.add('active');
+    currentStep = step;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goTo(step) {
+    var errs = validateStep(currentStep);
+    if (errs.length) { showToast(currentStep, errs); return; }
+    clearToast(currentStep);
+    switchStep(step);
+  }
+
+  function goBack(step) {
+    clearToast(currentStep);
+    switchStep(step);
+  }
+
+  /* ── Jump to error step on server re-render ── */
+  (function() {
+    var serverErrors = <%- JSON.stringify(typeof errors !== 'undefined' && errors ? errors : []) %>;
+    if (!serverErrors.length) return;
+    var combined = serverErrors.join(' ').toLowerCase();
+    var target = 1;
+    if (combined.includes('github') || combined.includes('linkedin')) target = 4;
+    else if (combined.includes('time') || combined.includes('availability')) target = 3;
+    else if (combined.includes('skill')) target = 2;
+    if (target > 1) switchStep(target);
+  })();
+
+  /* ── Validation (same rules as profile-setup) ── */
+  function validateStep(step) {
+    var errs = [];
+    if (step === 1) {
+      var name = document.getElementById('nameInput');
+      if (!name.value.trim()) {
+        errs.push('Full name is required.'); markError(name, true);
+      } else if (name.value.trim().length < 2) {
+        errs.push('Name must be at least 2 characters.'); markError(name, true);
+      } else { markError(name, false); }
+    }
+    if (step === 2) {
+      if (wantedTags.length === 0) {
+        errs.push('Add at least one skill you want to learn.');
+        document.getElementById('wantedWrap').classList.add('input-error');
+      } else {
+        document.getElementById('wantedWrap').classList.remove('input-error');
+      }
+    }
+    if (step === 3) {
+
+      if (selectedDays.length === 0) {
+      errs.push('Select at least one available day.');
+     }
+      var from = document.getElementById('fromTime');
+      var to   = document.getElementById('toTime');
+      if (from.value && to.value && from.value >= to.value) {
+        errs.push('"From" time must be earlier than "To" time.');
+        markError(from, true); markError(to, true);
+      } else { markError(from, false); markError(to, false); }
+    }
+    if (step === 4) {
+      var urlPattern = /^https?:\/\/.+\..+/i;
+      var fields = [
+        { name: 'github',   label: 'GitHub',   rowId: 'githubRow' },
+        { name: 'linkedin', label: 'LinkedIn', rowId: 'linkedinRow' }
+      ];
+      fields.forEach(function(f) {
+        var val = document.querySelector('input[name="' + f.name + '"]').value.trim();
+        if (val && !urlPattern.test(val)) {
+          errs.push(f.label + ' URL must start with http:// or https://');
+          markRowError(f.rowId, true);
+        } else { markRowError(f.rowId, false); }
+      });
+    }
+    return errs;
+  }
+
+  /* ── Toast helpers ── */
+  function showToast(step, errs) {
+    var toast = document.getElementById('toast' + step);
+    var list  = document.getElementById('toastList' + step);
+    list.innerHTML = errs.map(function(e){ return '<li>' + e + '</li>'; }).join('');
+    toast.classList.add('visible');
+  }
+  function clearToast(step) {
+    var t = document.getElementById('toast' + step);
+    if (t) t.classList.remove('visible');
+  }
+  function markError(el, has) { el.classList.toggle('input-error', has); }
+  function markRowError(id, has) {
+    var row = document.getElementById(id);
+    if (row) row.classList.toggle('input-error', has);
+  }
+
+  /* ── Save (step 4 finish) ── */
+  function handleSave() {
+    var errs = validateStep(4);
+    if (errs.length) { showToast(4, errs); return; }
+    clearToast(4);
+    prepareSubmit();
+    document.getElementById('editForm').submit();
+  }
+
+  /* ── Photo preview ── */
+  document.getElementById('photoInput').addEventListener('change', function() {
+    var file = this.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('photoImg').src = e.target.result;
+      document.getElementById('photoImg').style.display = 'block';
+      document.getElementById('photoPreview').classList.add('has-image');
+      document.getElementById('uploadBtnText').textContent =
+        file.name.length > 20 ? file.name.slice(0, 20) + '...' : file.name;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  /* ── Tag input ── */
+  var offeredTags = [];
+  var wantedTags  = [];
+
+  // Pre-fill from existing user data
+  (function restoreTags() {
+    var offeredRaw = '<%= user && user.skillsOffered ? user.skillsOffered.join(",") : "" %>';
+    var wantedRaw  = '<%= user && user.skillsWanted  ? user.skillsWanted.join(",")  : "" %>';
+    // If formData overrides (re-render after error), use that instead
+    var formOffered = '<%- (typeof formData !== "undefined" && formData && formData.skillsOffered) ? formData.skillsOffered : "" %>';
+    var formWanted  = '<%- (typeof formData !== "undefined" && formData && formData.skillsWanted)  ? formData.skillsWanted  : "" %>';
+    if (formOffered) offeredRaw = formOffered;
+    if (formWanted)  wantedRaw  = formWanted;
+
+    if (offeredRaw) offeredRaw.split(',').map(function(s){ return s.trim(); }).filter(Boolean).forEach(function(v) {
+      addTag(v, offeredTags, document.getElementById('offeredWrap'), document.getElementById('offeredInput'), 'tag-offered');
+    });
+    if (wantedRaw) wantedRaw.split(',').map(function(s){ return s.trim(); }).filter(Boolean).forEach(function(v) {
+      addTag(v, wantedTags, document.getElementById('wantedWrap'), document.getElementById('wantedInput'), 'tag-wanted');
+    });
+  })();
+
+  function addTag(value, list, wrap, inputEl, tagClass) {
+    var val = value.trim().replace(/,$/, '');
+    if (!val || list.indexOf(val) !== -1) return;
+    list.push(val);
+    var tag = document.createElement('span');
+    tag.className = 'tag ' + tagClass;
+    var listName = list === offeredTags ? 'offeredTags' : 'wantedTags';
+    tag.innerHTML = val + ' <button type="button" class="tag-remove" onclick="removeTag(\'' + val + '\',\'' + listName + '\',this)">×</button>';
+    wrap.insertBefore(tag, inputEl);
+    inputEl.value = '';
+    wrap.classList.remove('input-error');
+  }
+
+  function removeTag(val, listName, btn) {
+    var list = listName === 'offeredTags' ? offeredTags : wantedTags;
+    var idx  = list.indexOf(val);
+    if (idx > -1) list.splice(idx, 1);
+    btn.parentElement.remove();
+  }
+
+  function setupTagInput(inputId, wrapId, list, tagClass) {
+    var input = document.getElementById(inputId);
+    var wrap  = document.getElementById(wrapId);
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(input.value, list, wrap, input, tagClass); }
+      if (e.key === 'Backspace' && !input.value && list.length) {
+        var last  = list[list.length - 1];
+        var lname = list === offeredTags ? 'offeredTags' : 'wantedTags';
+        var btn   = wrap.querySelector('.tag:last-of-type .tag-remove');
+        if (btn) removeTag(last, lname, btn);
+      }
+    });
+    input.addEventListener('blur', function() {
+      if (input.value.trim()) addTag(input.value, list, wrap, input, tagClass);
+    });
+  }
+
+  setupTagInput('offeredInput', 'offeredWrap', offeredTags, 'tag-offered');
+  setupTagInput('wantedInput',  'wantedWrap',  wantedTags,  'tag-wanted');
+
+  /* ── Availability days ── */
+  var selectedDays = [];
+
+  // Pre-fill from existing user data
+  (function restoreDays() {
+    var raw = '<%= user && user.availability && user.availability.days ? user.availability.days : "" %>';
+    var formRaw = '<%- (typeof formData !== "undefined" && formData && formData["availability[days]"]) ? formData["availability[days]"] : "" %>';
+    if (formRaw) raw = formRaw;
+    if (!raw) return;
+    raw.split(',').map(function(d){ return d.trim(); }).filter(Boolean).forEach(function(day) {
+      var btn = document.querySelector('.day-btn[data-day="' + day + '"]');
+      if (btn) { btn.classList.add('selected'); selectedDays.push(day); }
+    });
+  })();
+
+  function toggleDay(btn) {
+    var day = btn.dataset.day;
+    if (btn.classList.contains('selected')) {
+      btn.classList.remove('selected');
+      var idx = selectedDays.indexOf(day);
+      if (idx > -1) selectedDays.splice(idx, 1);
+    } else {
+      btn.classList.add('selected');
+      selectedDays.push(day);
+    }
+  }
+
+  /* ── Prepare submit ── */
+  function prepareSubmit() {
+    document.getElementById('skillsOfferedHidden').value = offeredTags.join(',');
+    document.getElementById('skillsWantedHidden').value  = wantedTags.join(',');
+    document.getElementById('daysHidden').value          = selectedDays.join(',');
+  }
+</script>
+
+</body>
+</html>

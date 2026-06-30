@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - SkillSwap</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <%- include('../partials/adminSidebar', { activePage: 'dashboard' }) %>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: #eeeaf8;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    
+    /* ── Main ── */
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      padding: 32px 28px;
+      min-height: 100vh;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .topbar-left h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1340;
+    }
+
+    .topbar-left p {
+      font-size: 13px;
+      color: #9b94c4;
+      margin-top: 2px;
+    }
+
+    .admin-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: white;
+      border: 1px solid #e5e0f5;
+      border-radius: 50px;
+      padding: 6px 16px 6px 6px;
+    }
+
+    .admin-avatar {
+      width: 32px; height: 32px;
+      background: #6c63ff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: white;
+    }
+
+    .admin-badge span {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1a1340;
+    }
+
+    /* ── Stat Cards ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px 22px;
+      border: 1px solid #ede8ff;
+      box-shadow: 0 2px 10px rgba(108, 99, 255, 0.06);
+    }
+
+    .card-icon {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .card-icon svg { width: 20px; height: 20px; fill: none; stroke-width: 2; }
+    .card-icon.purple { background: #f0ebff; }
+    .card-icon.purple svg { stroke: #6c63ff; }
+    .card-icon.green  { background: #edfaf3; }
+    .card-icon.green  svg { stroke: #22c55e; }
+    .card-icon.red    { background: #fff0f0; }
+    .card-icon.red    svg { stroke: #e05252; }
+    .card-icon.amber  { background: #fffbeb; }
+    .card-icon.amber  svg { stroke: #f59e0b; }
+
+    .card-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #9b94c4;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+
+    .card-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1340;
+      margin-bottom: 8px;
+    }
+
+    .card-trend {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 50px;
+      display: inline-block;
+    }
+
+    .card-trend.up   { background: #edfaf3; color: #16a34a; }
+    .card-trend.down { background: #fff0f0; color: #dc2626; }
+
+    /* ── Charts Row ── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .chart-card {
+      background: white;
+      border-radius: 16px;
+      padding: 22px 24px;
+      border: 1px solid #ede8ff;
+      box-shadow: 0 2px 10px rgba(108, 99, 255, 0.06);
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .chart-header h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1340;
+    }
+
+    .chart-header p {
+      font-size: 12px;
+      color: #9b94c4;
+      margin-top: 2px;
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 14px;
+    }
+
+    .leg {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: #5a5280;
+    }
+
+    .leg-dot {
+      width: 8px; height: 8px;
+      border-radius: 2px;
+    }
+
+    .chart-wrap-line   { position: relative; height: 200px; }
+    .chart-wrap-donut  { position: relative; height: 200px; }
+
+    /* ── Table ── */
+    .table-card {
+      background: white;
+      border-radius: 16px;
+      padding: 22px 24px;
+      border: 1px solid #ede8ff;
+      box-shadow: 0 2px 10px rgba(108, 99, 255, 0.06);
+    }
+
+    .table-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .table-topbar h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1340;
+    }
+
+    .table-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #e5e0f5;
+      border-radius: 10px;
+      padding: 8px 14px;
+      background: #faf9ff;
+    }
+
+    .search-box svg { width: 15px; height: 15px; stroke: #b0a8d8; fill: none; flex-shrink: 0; }
+
+    .search-box input {
+      border: none; outline: none;
+      background: transparent;
+      font-size: 13px;
+      color: #1a1340;
+      font-family: 'Inter', Arial, sans-serif;
+      width: 180px;
+    }
+
+    .search-box input::placeholder { color: #b0a8d8; }
+
+    .filter-tabs { display: flex; gap: 6px; }
+
+    .ftab {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 50px;
+      cursor: pointer;
+      border: 1px solid #e5e0f5;
+      background: transparent;
+      color: #9b94c4;
+      font-family: 'Inter', Arial, sans-serif;
+      transition: all 0.15s;
+    }
+
+    .ftab:hover { background: #f3f0ff; color: #6c63ff; border-color: #c9c1f5; }
+    .ftab.active { background: #6c63ff; color: white; border-color: #6c63ff; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+    thead th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #b0a8d8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #f0ebff;
+    }
+
+    tbody td {
+      padding: 12px;
+      border-bottom: 1px solid #f9f7ff;
+      color: #1a1340;
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #faf9ff; }
+
+    .user-cell { display: flex; align-items: center; gap: 10px; }
+
+    .u-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .u-name  { font-weight: 500; font-size: 13px; color: #1a1340; }
+    .u-email { font-size: 12px; color: #9b94c4; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-active { background: #edfaf3; color: #16a34a; }
+    .badge-banned { background: #fff0f0; color: #dc2626; }
+    .badge-idle   { background: #fffbeb; color: #d97706; }
+
+    .action-btns { display: flex; gap: 6px; }
+
+    .act-btn {
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid #e5e0f5;
+      background: transparent;
+      color: #5a5280;
+      font-family: 'Inter', Arial, sans-serif;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 4px;
+      transition: all 0.15s;
+    }
+
+    .act-btn:hover { background: #f3f0ff; color: #6c63ff; border-color: #c9c1f5; }
+    .act-btn.ban   { color: #dc2626; border-color: #fca5a5; }
+    .act-btn.ban:hover { background: #fff0f0; }
+    .act-btn.unban { color: #16a34a; border-color: #86efac; }
+    .act-btn.unban:hover { background: #edfaf3; }
+
+    .empty-row td {
+      text-align: center;
+      padding: 36px;
+      color: #b0a8d8;
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .charts-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  
+  
+
+  <!-- ── Main Content ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>Dashboard</h1>
+        <p>Welcome back! Here's what's happening today.</p>
+      </div>
+      <div class="admin-badge">
+        <div class="admin-avatar">A</div>
+        <span>Admin</span>
+      </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon purple">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <div class="card-label">Total Users</div>
+        <div class="card-value"><%= totalUsers || 0 %></div>
+       
+      </div>
+
+      <div class="card">
+        <div class="card-icon green">
+          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="card-label">Active Users</div>
+        <div class="card-value"><%= activeUsers || 0 %></div>
+        
+      </div>
+
+      <div class="card">
+        <div class="card-icon red">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        </div>
+        <div class="card-label">Banned Users</div>
+        <div class="card-value"><%= bannedUsers || 0 %></div>
+        
+      </div>
+
+      <div class="card">
+        <div class="card-icon amber">
+          <svg viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+        </div>
+        <div class="card-label">Skill Swaps</div>
+        <div class="card-value"><%= totalSwaps || 0 %></div>
+        
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h3>User Growth</h3>
+            <p>Total vs Active - last months</p>
+          </div>
+          <div class="chart-legend">
+            <span class="leg"><span class="leg-dot" style="background:#6c63ff"></span>Total</span>
+            <span class="leg"><span class="leg-dot" style="background:#22c55e"></span>Active</span>
+          </div>
+        </div>
+        <div class="chart-wrap-line">
+          <canvas id="lineChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h3>User Status</h3>
+            <p>Breakdown by status</p>
+          </div>
+        </div>
+        <div class="chart-wrap-donut">
+          <canvas id="donutChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-card">
+      <div class="table-topbar">
+        <h3>All Users</h3>
+        <div class="table-controls">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="searchInput" placeholder="Search users..." />
+          </div>
+          <div class="filter-tabs">
+            <button class="ftab active" onclick="filterUsers('all', this)">All</button>
+            <button class="ftab" onclick="filterUsers('active', this)">Active</button>
+            <button class="ftab" onclick="filterUsers('banned', this)">Banned</button>
+            <button class="ftab" onclick="filterUsers('idle', this)">Idle</button>
+          </div>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Skills</th>
+            <th>Joined</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="userTable"></tbody>
+      </table>
+    </div>
+
+  </div><!-- /.main -->
+
+  <script>
+    /* ── Server data from EJS ── */
+    const totalUsers  = Number("<%- totalUsers  || 0 %>");
+    const activeUsers = Number("<%- activeUsers  || 0 %>");
+    const bannedUsers = Number("<%- bannedUsers  || 0 %>");
+    const idleUsers   = Math.max(0, totalUsers - activeUsers - bannedUsers);
+
+    /* Pass your users array from the controller like:
+       res.render('admin/dashboard', { users, totalUsers, activeUsers, bannedUsers, totalSwaps }) */
+    const usersData = <%- JSON.stringify(users || []) %>;
+
+    /* ── Line Chart: User Growth ── */
+    new Chart(document.getElementById('lineChart'), {
+      type: 'line',
+      data: {
+        labels: <%- JSON.stringify((function() {
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const now = new Date();
+      const labels = [];
+      for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+       labels.push(months[d.getMonth()]);
+     }
+     return labels;
+    })()) %>,
+        datasets: [
+          {
+            label: 'Total Users',
+           data: <%- JSON.stringify(monthlyData) %>,
+            borderColor: '#6c63ff',
+            backgroundColor: 'rgba(108,99,255,0.08)',
+            fill: true, tension: 0.4,
+            pointRadius: 4, pointBackgroundColor: '#6c63ff', borderWidth: 2
+          },
+          {
+            label: 'Active Users',
+            data: <%- JSON.stringify(monthlyActive) %>,
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34,197,94,0.06)',
+            fill: true, tension: 0.4,
+            pointRadius: 4, pointBackgroundColor: '#22c55e', borderWidth: 2,
+            borderDash: [5, 4]
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(108,99,255,0.06)' }, ticks: { color: '#9b94c4', font: { size: 11, family: 'Inter' } } },
+          y: { grid: { color: 'rgba(108,99,255,0.06)' }, ticks: { color: '#9b94c4', font: { size: 11, family: 'Inter' } } }
+        }
+      }
+    });
+
+    /* ── Donut Chart: Status ── */
+    new Chart(document.getElementById('donutChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Active', 'Idle', 'Banned'],
+        datasets: [{
+          data: [activeUsers, idleUsers, bannedUsers],
+          backgroundColor: ['#6c63ff', '#f59e0b', '#e05252'],
+          borderWidth: 0, hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#5a5280', font: { size: 12, family: 'Inter' }, padding: 16, usePointStyle: true }
+          }
+        }
+      }
+    });
+
+    /* ── Users Table ── */
+    const avatarColors = [
+      { bg:'#f0ebff', tc:'#6c63ff' }, { bg:'#edfaf3', tc:'#16a34a' },
+      { bg:'#fff0f0', tc:'#dc2626' }, { bg:'#fffbeb', tc:'#d97706' },
+      { bg:'#e0f2fe', tc:'#0369a1' }, { bg:'#fce7f3', tc:'#be185d' }
+    ];
+
+    let currentFilter = 'all';
+    let searchTerm = '';
+
+   function renderTable() {
+  const tbody = document.getElementById('userTable');
+  const filtered = usersData.filter(u => {
+    const status = u.isBanned ? 'banned' : 'active';  // ← derive from isBanned
+    const matchFilter = currentFilter === 'all' || status === currentFilter;
+    const name  = (u.name || u.username || '').toLowerCase();
+    const email = (u.email || '').toLowerCase();
+    return matchFilter && (name.includes(searchTerm) || email.includes(searchTerm));
+  });
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No users found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((u, i) => {
+    const displayName = u.name || u.username || 'Unknown';
+    const initials = displayName.split(' ').map(x => x[0]).join('').toUpperCase().slice(0, 2);
+    const col = avatarColors[i % avatarColors.length];
+    const status = u.isBanned ? 'banned' : 'active';  // ← derive from isBanned
+    const badgeClass = status === 'banned' ? 'badge-banned' : 'badge-active';
+    const skills = Array.isArray(u.skillsOffered) ? u.skillsOffered.slice(0,2).join(', ') : '—'; // ← skillsOffered not skills
+    const joined = u.createdAt
+      ? new Date(u.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
+      : '—';
+    const actionBtn = u.isBanned
+     ? `<button class="act-btn unban" onclick="handleBan('${u._id}','unban')">✓ Unban</button>`
+     : `<button class="act-btn ban" onclick="handleBan('${u._id}','ban')">⊘ Ban</button>`;
+         
+        return `<tr>
+          <td>
+            <div class="user-cell">
+              <div class="u-avatar" style="background:${col.bg};color:${col.tc}">${initials}</div>
+              <div>
+                <div class="u-name">${displayName}</div>
+                <div class="u-email">${u.email || ''}</div>
+              </div>
+            </div>
+          </td>
+          <td style="color:#5a5280">${skills}</td>
+          <td style="color:#9b94c4">${joined}</td>
+          <td><span class="badge ${badgeClass}">${status}</span></td>
+          <td>
+            <div class="action-btns">
+              ${actionBtn}
+              <a href="/admin/users/${u._id}" class="act-btn">👁 View</a>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function filterUsers(f, el) {
+      currentFilter = f;
+      document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      renderTable();
+    }
+
+      async function handleBan(userId, action) {
+    if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+    try {
+      const res  = await fetch(`/admin/users/${userId}/${action}`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        const u = usersData.find(x => String(x._id) === String(userId));
+        if (u) u.isBanned = action === 'ban';
+        renderTable();
+      } else {
+        alert('Action failed: ' + (data.message || 'Unknown error'));
+      }
+    } catch {
+      alert('Network error. Please try again.');
+    }
+  }
+
+  document.getElementById('searchInput').addEventListener('input', function() {
+    searchTerm = this.value.toLowerCase();
+    renderTable();
+  });
+
+  renderTable();
+  </script>
+</body>
+</html>

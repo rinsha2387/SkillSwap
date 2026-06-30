@@ -1,0 +1,157 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/topbar') %>
+
+<div class="history-page">
+  <div class="page-header">
+    <h1>Payment History</h1>
+    <p>All your payments and earnings in one place</p>
+  </div>
+
+  <% if (payments.length === 0) { %>
+  <div class="empty-state">
+    <p>No payments yet.</p>
+    <a href="/explore" class="btn-primary">Explore Skills</a>
+  </div>
+  <% } else { %>
+  <div class="payment-table-wrapper">
+    <table class="payment-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>With</th>
+          <th>Role</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% payments.forEach(p => { %>
+        <% const isPayer = p.payer._id.toString() === currentUser._id.toString(); %>
+        <tr>
+          <td><%= new Date(p.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+          <td>
+            <span class="type-badge type-<%= p.paymentType %>">
+              <%= p.paymentType === 'paid_session' ? 'Paid Session' : 'Group Swap' %>
+            </span>
+          </td>
+          <td>
+            <div class="user-cell">
+              <% const otherUser = isPayer ? p.payee : p.payer; %>
+              <% if (otherUser.profilePic) { %>
+                <img src="<%= otherUser.profilePic %>" alt="" class="mini-avatar" />
+              <% } %>
+              <%= otherUser.name %>
+            </div>
+          </td>
+          <td>
+            <span class="role-badge role-<%= isPayer ? 'payer' : 'payee' %>">
+              <%= isPayer ? '💸 Paid' : '💰 Received' %>
+            </span>
+          </td>
+          <td class="amount-cell <%= isPayer ? 'amount-debit' : 'amount-credit' %>">
+            <%= isPayer ? '-' : '+' %>₹<%= (p.amount / 100).toFixed(2) %>
+          </td>
+          <td>
+            <span class="status-badge status-<%= p.status %>">
+              <%= p.status.charAt(0).toUpperCase() + p.status.slice(1) %>
+            </span>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</div>
+
+<style>
+  .history-page {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+  }
+
+  .page-header { margin-bottom: 2rem; }
+  .page-header h1 { font-size: 1.8rem; font-weight: 700; color: #1a1a2e; }
+  .page-header p { color: #666; margin-top: 0.25rem; }
+
+  .empty-state { text-align: center; padding: 4rem 1rem; color: #888; }
+
+  .payment-table-wrapper {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(108, 99, 255, 0.08);
+    overflow: hidden;
+  }
+
+  .payment-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .payment-table thead {
+    background: #f8f6ff;
+  }
+
+  .payment-table th {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 1px solid #ede9fc;
+  }
+
+  .payment-table td {
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid #f3f0ff;
+    color: #333;
+  }
+
+  .payment-table tr:last-child td { border-bottom: none; }
+
+  .type-badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .type-paid_session { background: #e0f2fe; color: #0369a1; }
+  .type-group_swap { background: #fce7f3; color: #be185d; }
+
+  .role-badge { font-size: 0.82rem; }
+
+  .user-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .mini-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .amount-cell { font-weight: 700; }
+  .amount-debit { color: #ef4444; }
+  .amount-credit { color: #22c55e; }
+
+  .status-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 99px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .status-completed { background: #e6faf0; color: #16a34a; }
+  .status-pending { background: #fef9c3; color: #854d0e; }
+  .status-failed { background: #fee2e2; color: #dc2626; }
+  .status-refunded { background: #f3f4f6; color: #6b7280; }
+</style>
+
+<%- include('../partials/footer') %>

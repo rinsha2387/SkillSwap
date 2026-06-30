@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/header') %>
+<body>
+
+<%- include('../partials/navbar', { activePage: 'swaps' }) %>
+<%- include('../partials/topbar') %>
+
+<div class="page-wrap">
+<div class="req-container">
+
+  <!-- ── Page header ── -->
+  <div class="req-page-head">
+    <div>
+      <h1 class="req-page-title">Swap Requests</h1>
+      <p class="req-page-sub">Manage incoming requests and track ones you've sent</p>
+    </div>
+    <% if (pendingCount > 0) { %>
+    <span class="req-pending-pill">
+      <span class="pulse-dot"></span>
+      <%= pendingCount %> pending
+    </span>
+    <% } %>
+  </div>
+
+  <!-- ── Tabs ── -->
+  <div class="req-tabs">
+    <button class="rtab active" data-tab="incoming" onclick="switchTab('incoming', this)">
+      Incoming
+      <% if (pendingCount > 0) { %>
+        <span class="rtab-badge"><%= pendingCount %></span>
+      <% } %>
+    </button>
+    <button class="rtab" data-tab="outgoing" onclick="switchTab('outgoing', this)">
+      Sent
+      <% var pendingOut = outgoing.filter(function(r){ return r.status==='pending'; }).length; %>
+      <% if (pendingOut > 0) { %>
+        <span class="rtab-badge rtab-badge-gray"><%= pendingOut %></span>
+      <% } %>
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════
+       INCOMING TAB
+  ══════════════════════════════ -->
+  <div class="req-panel active" id="panel-incoming">
+    <% if (incoming.length === 0) { %>
+      <div class="req-empty">
+        <div class="req-empty-icon">📭</div>
+        <p>No incoming requests yet</p>
+        <span>When someone sends you a swap request, it will appear here</span>
+      </div>
+    <% } else { %>
+      <div class="req-list">
+        <% incoming.forEach(function(r) {
+             var isPending  = r.status === 'pending';
+             var isAccepted = r.status === 'accepted';
+             var isRejected = r.status === 'rejected';
+        %>
+        <div class="req-card <%= isPending ? 'req-card-pending' : '' %>">
+
+          <!-- Status strip -->
+          <div class="req-strip req-strip-<%= r.status %>"></div>
+
+          <div class="req-card-body">
+            <!-- User info -->
+            <div class="req-user">
+              <div class="req-avatar-wrap">
+                <a href="/users/<%= r.requester ? r.requester._id : '' %>">
+                  <% if (r.requester && r.requester.profilePic) { %>
+                    <img src="<%= r.requester.profilePic %>" alt="<%= r.requester.name %>" class="req-avatar"/>
+                  <% } else { %>
+                    <div class="req-avatar req-avatar-fb">
+                      <%= r.requester ? r.requester.name.charAt(0).toUpperCase() : '?' %>
+                    </div>
+                  <% } %>
+                </a>
+                <% if (isPending) { %><span class="req-online"></span><% } %>
+              </div>
+              <div class="req-user-info">
+                <p class="req-name"><%= r.requester ? r.requester.name : 'Unknown' %></p>
+                <% if (r.requester && r.requester.location) { %>
+                  <p class="req-loc">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="11" height="11">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <%= r.requester.location %>
+                  </p>
+                <% } %>
+                <p class="req-time">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="11" height="11">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <%= new Date(r.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) %>
+                </p>
+              </div>
+              <!-- Status badge -->
+              <span class="req-status-badge badge-<%= r.status %>">
+                <% if (isAccepted) { %>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg>
+                <% } else if (isRejected) { %>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <% } else { %>
+                  <span class="dot-pulse"></span>
+                <% } %>
+                <%= r.status.charAt(0).toUpperCase() + r.status.slice(1) %>
+              </span>
+            </div>
+
+            <!-- Skills exchange -->
+            <div class="req-skills-row">
+              <div class="req-skill-block">
+                <p class="req-skill-label">They offer</p>
+                <div class="req-skill-tags">
+                  <% if (r.skillsOffered && r.skillsOffered.length) { %>
+                    <% r.skillsOffered.slice(0,3).forEach(function(s){ %>
+                      <span class="req-tag req-tag-offer"><%= s %></span>
+                    <% }) %>
+                    <% if (r.skillsOffered.length > 3) { %><span class="req-tag-more">+<%= r.skillsOffered.length-3 %></span><% } %>
+                  <% } else { %><span class="req-tag-empty">—</span><% } %>
+                </div>
+              </div>
+              <div class="req-swap-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                  <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+                </svg>
+              </div>
+              <div class="req-skill-block">
+                <p class="req-skill-label">They want</p>
+                <div class="req-skill-tags">
+                  <% if (r.skillsWanted && r.skillsWanted.length) { %>
+                    <% r.skillsWanted.slice(0,3).forEach(function(s){ %>
+                      <span class="req-tag req-tag-want"><%= s %></span>
+                    <% }) %>
+                    <% if (r.skillsWanted.length > 3) { %><span class="req-tag-more">+<%= r.skillsWanted.length-3 %></span><% } %>
+                  <% } else { %><span class="req-tag-empty">—</span><% } %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Message -->
+            <% if (r.message) { %>
+            <div class="req-message">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+              "<%= r.message %>"
+            </div>
+            <% } %>
+
+            <!-- ── ACTIONS ── -->
+            <% if (isPending) { %>
+              <!-- Pending: Accept / Ignore buttons -->
+              <div class="req-actions">
+                <form action="/swaps/<%= r._id %>/accept" method="POST" style="flex:1">
+                  <button type="submit" class="req-btn req-btn-accept">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+                    Accept
+                  </button>
+                </form>
+                <form action="/swaps/<%= r._id %>/reject" method="POST" style="flex:1">
+                  <button type="submit" class="req-btn req-btn-reject">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Ignore
+                  </button>
+                </form>
+              </div>
+
+            <% } else if (isAccepted) { %>
+              <!-- Accepted: Open Chat button -->
+              <div class="req-actions">
+                <a href="/chats/<%= r._id %>" class="req-btn req-btn-chat">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                  </svg>
+                  Open Chat with <%= r.requester ? r.requester.name.split(' ')[0] : 'User' %>
+                </a>
+              </div>
+
+            <% } else if (isRejected) { %>
+              <!-- Rejected: info label -->
+              <div class="req-rejected-note">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                This request was ignored
+              </div>
+            <% } %>
+
+          </div>
+        </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- ══════════════════════════════
+       OUTGOING TAB
+  ══════════════════════════════ -->
+  <div class="req-panel" id="panel-outgoing">
+    <% if (outgoing.length === 0) { %>
+      <div class="req-empty">
+        <div class="req-empty-icon">📤</div>
+        <p>No sent requests yet</p>
+        <span>Find someone to swap skills with on the <a href="/explore">Explore</a> page</span>
+      </div>
+    <% } else { %>
+      <div class="req-list">
+        <% outgoing.forEach(function(r) {
+             var isPending  = r.status === 'pending';
+             var isAccepted = r.status === 'accepted';
+             var isRejected = r.status === 'rejected';
+        %>
+        <div class="req-card">
+          <div class="req-strip req-strip-<%= r.status %>"></div>
+          <div class="req-card-body">
+
+            <div class="req-user">
+              <div class="req-avatar-wrap">
+                <% if (r.receiver && r.receiver.profilePic) { %>
+                  <img src="<%= r.receiver.profilePic %>" alt="<%= r.receiver.name %>" class="req-avatar"/>
+                <% } else { %>
+                  <div class="req-avatar req-avatar-fb">
+                    <%= r.receiver ? r.receiver.name.charAt(0).toUpperCase() : '?' %>
+                  </div>
+                <% } %>
+              </div>
+              <div class="req-user-info">
+                <p class="req-name"><%= r.receiver ? r.receiver.name : 'Unknown' %></p>
+                <% if (r.receiver && r.receiver.location) { %>
+                  <p class="req-loc">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="11" height="11">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <%= r.receiver.location %>
+                  </p>
+                <% } %>
+                <p class="req-time">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="11" height="11">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  Sent <%= new Date(r.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) %>
+                </p>
+              </div>
+              <span class="req-status-badge badge-<%= r.status %>">
+                <% if (isAccepted) { %>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg>
+                <% } else if (isRejected) { %>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <% } else { %>
+                  <span class="dot-pulse"></span>
+                <% } %>
+                <%= r.status.charAt(0).toUpperCase() + r.status.slice(1) %>
+              </span>
+            </div>
+
+            <div class="req-skills-row">
+              <div class="req-skill-block">
+                <p class="req-skill-label">You offer</p>
+                <div class="req-skill-tags">
+                  <% if (r.skillsOffered && r.skillsOffered.length) { %>
+                    <% r.skillsOffered.slice(0,3).forEach(function(s){ %>
+                      <span class="req-tag req-tag-offer"><%= s %></span>
+                    <% }) %>
+                  <% } else { %><span class="req-tag-empty">—</span><% } %>
+                </div>
+              </div>
+              <div class="req-swap-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                  <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+                </svg>
+              </div>
+              <div class="req-skill-block">
+                <p class="req-skill-label">You want</p>
+                <div class="req-skill-tags">
+                  <% if (r.skillsWanted && r.skillsWanted.length) { %>
+                    <% r.skillsWanted.slice(0,3).forEach(function(s){ %>
+                      <span class="req-tag req-tag-want"><%= s %></span>
+                    <% }) %>
+                  <% } else { %><span class="req-tag-empty">—</span><% } %>
+                </div>
+              </div>
+            </div>
+
+            <% if (r.message) { %>
+            <div class="req-message">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+              "<%= r.message %>"
+            </div>
+            <% } %>
+
+            <!-- ── ACTIONS ── -->
+            <% if (isPending) { %>
+              <!-- Pending: cancel -->
+              <div class="req-actions">
+                <form action="/swaps/<%= r._id %>/cancel" method="POST" style="flex:1">
+                  <button type="submit" class="req-btn req-btn-cancel">Cancel Request</button>
+                </form>
+              </div>
+
+            <% } else if (isAccepted) { %>
+              <!-- Accepted: Open Chat -->
+              <div class="req-actions">
+                <a href="/chats/<%= r._id %>" class="req-btn req-btn-chat">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                  </svg>
+                  Open Chat with <%= r.receiver ? r.receiver.name.split(' ')[0] : 'User' %>
+                </a>
+              </div>
+
+            <% } else if (isRejected) { %>
+              <!-- Rejected -->
+              <div class="req-rejected-note">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                This request was not accepted
+              </div>
+            <% } %>
+
+          </div>
+        </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+</div>
+</div>
+
+<style>
+  .page-wrap       { padding-top: 64px; background: #F7F6FB; min-height: 100vh; }
+  .req-container   { max-width: 760px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  .req-page-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+  }
+  .req-page-title { font-size: 22px; font-weight: 800; color: #1a1830; }
+  .req-page-sub   { font-size: 13px; color: #8785A0; margin-top: 3px; }
+  .req-pending-pill {
+    display: flex; align-items: center; gap: 7px;
+    background: #EDE9FE; color: #7c3aed;
+    font-size: 12px; font-weight: 700;
+    padding: 6px 14px; border-radius: 50px;
+  }
+  .pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #7c3aed; flex-shrink: 0;
+    animation: pulse 1.4s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:.5; transform:scale(1.3); }
+  }
+
+  .req-tabs {
+    display: flex; gap: 4px;
+    background: #fff; border: 1px solid #ede9fe;
+    border-radius: 14px; padding: 5px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(124,58,237,.05);
+    width: fit-content;
+  }
+  .rtab {
+    display: flex; align-items: center; gap: 7px;
+    padding: 9px 20px; border-radius: 10px;
+    font-size: 13px; font-weight: 600; color: #8785A0;
+    background: transparent; border: none; cursor: pointer;
+    font-family: inherit; transition: all .18s;
+  }
+  .rtab:hover  { color: #7c3aed; background: #F5F3FF; }
+  .rtab.active { background: #7c3aed; color: #fff; box-shadow: 0 4px 12px rgba(124,58,237,.25); }
+  .rtab-badge {
+    background: #fff; color: #7c3aed;
+    font-size: 10px; font-weight: 800;
+    padding: 1px 7px; border-radius: 50px; min-width: 20px; text-align: center;
+  }
+  .rtab.active .rtab-badge { background: rgba(255,255,255,.25); color: #fff; }
+  .rtab-badge-gray { background: #F3F4F6; color: #6b7280; }
+
+  .req-panel { display: none; }
+  .req-panel.active { display: block; }
+
+  .req-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .req-card {
+    background: #fff; border: 1px solid #E8E6F0;
+    border-radius: 16px; overflow: hidden;
+    display: flex; transition: box-shadow .18s, transform .18s;
+  }
+  .req-card:hover { box-shadow: 0 6px 24px rgba(124,58,237,.09); transform: translateY(-1px); }
+  .req-card-pending { border-color: #DDD6FE; }
+
+  .req-strip { width: 4px; flex-shrink: 0; }
+  .req-strip-pending  { background: #7c3aed; }
+  .req-strip-accepted { background: #10B981; }
+  .req-strip-rejected { background: #EF4444; }
+
+  .req-card-body { flex: 1; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+  .req-user { display: flex; align-items: center; gap: 12px; }
+  .req-avatar-wrap { position: relative; flex-shrink: 0; }
+  .req-avatar { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; }
+  .req-avatar-fb {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: linear-gradient(135deg,#7c3aed,#4f46e5);
+    color: #fff; font-weight: 700; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .req-online {
+    position: absolute; bottom:1px; right:1px;
+    width:11px; height:11px; border-radius:50%;
+    background:#10B981; border:2px solid #fff;
+  }
+  .req-user-info { flex:1; min-width:0; }
+  .req-name { font-weight: 700; font-size: 15px; color: #1a1830; }
+  .req-loc  { display: flex; align-items: center; gap: 3px; font-size: 12px; color: #8785A0; margin-top: 2px; }
+  .req-time { display: flex; align-items: center; gap: 3px; font-size: 11px; color: #b0aec0; margin-top: 3px; }
+
+  .req-status-badge {
+    flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 50px;
+  }
+  .badge-pending  { background: #EDE9FE; color: #7c3aed; }
+  .badge-accepted { background: #DCFCE7; color: #16A34A; }
+  .badge-rejected { background: #FEE2E2; color: #DC2626; }
+  .dot-pulse {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor; flex-shrink: 0;
+    animation: pulse 1.4s infinite;
+  }
+
+  .req-skills-row {
+    display: flex; align-items: center; gap: 12px;
+    background: #FAFAFA; border-radius: 12px; padding: 12px 14px;
+  }
+  .req-skill-block { flex: 1; min-width: 0; }
+  .req-skill-label { font-size: 10px; font-weight: 700; color: #b0aec0; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .req-skill-tags  { display: flex; flex-wrap: wrap; gap: 5px; }
+  .req-tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 50px; }
+  .req-tag-offer { background: #EDE9FE; color: #7c3aed; }
+  .req-tag-want  { background: #DBEAFE; color: #1D4ED8; }
+  .req-tag-more  { font-size: 11px; color: #b0aec0; padding: 3px 0; }
+  .req-tag-empty { font-size: 12px; color: #b0aec0; }
+  .req-swap-arrow { color: #b0aec0; flex-shrink: 0; }
+
+  .req-message {
+    display: flex; align-items: flex-start; gap: 7px;
+    font-size: 13px; color: #4b5563; font-style: italic;
+    background: #F9F8FF; border-left: 3px solid #DDD6FE;
+    padding: 10px 14px; border-radius: 0 8px 8px 0;
+  }
+  .req-message svg { flex-shrink:0; margin-top:2px; color:#b0aec0; }
+
+  /* ── Action buttons ── */
+  .req-actions { display: flex; gap: 10px; }
+  .req-btn {
+    width: 100%; padding: 10px; border-radius: 10px;
+    font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    cursor: pointer; border: none; font-family: inherit;
+    transition: all .18s; text-decoration: none;
+  }
+  .req-btn-accept { background: #7c3aed; color: #fff; }
+  .req-btn-accept:hover { background: #6D28D9; box-shadow: 0 4px 14px rgba(124,58,237,.3); }
+  .req-btn-reject { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+  .req-btn-reject:hover { background: #FEE2E2; }
+  .req-btn-cancel { background: #F3F4F6; color: #6B7280; }
+  .req-btn-cancel:hover { background: #E5E7EB; color: #374151; }
+
+  /* ── Chat button (new) ── */
+  .req-btn-chat {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(16,185,129,.25);
+  }
+  .req-btn-chat:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    box-shadow: 0 6px 18px rgba(16,185,129,.35);
+    transform: translateY(-1px);
+  }
+
+  /* ── Rejected note ── */
+  .req-rejected-note {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: #b0aec0; font-style: italic;
+  }
+
+  .req-empty {
+    text-align: center; padding: 56px 20px;
+    background: #fff; border: 1px solid #E8E6F0; border-radius: 16px;
+  }
+  .req-empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .req-empty p    { font-weight: 700; font-size: 16px; color: #1a1830; margin-bottom: 6px; }
+  .req-empty span { font-size: 13px; color: #8785A0; }
+  .req-empty a    { color: #7c3aed; font-weight: 600; text-decoration: none; }
+
+  @media (max-width: 600px) {
+    .req-container  { padding: 16px 14px 48px; }
+    .req-skills-row { flex-direction: column; gap: 8px; }
+    .req-swap-arrow { transform: rotate(90deg); }
+    .req-actions    { flex-direction: column; }
+  }
+</style>
+
+<script>
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.rtab').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.req-panel').forEach(function(p){ p.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('panel-' + tab).classList.add('active');
+  }
+</script>
+
+</body>
+</html>

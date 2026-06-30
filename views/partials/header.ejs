@@ -1,0 +1,131 @@
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SkillSwap – <%= typeof title !== 'undefined' ? title : 'Dashboard' %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    /* ── TOKENS ─────────────────────────── */
+    :root {
+      --brand:        #7C3AED;
+      --brand-2:      #4F46E5;
+      --brand-glow:   rgba(124,58,237,.18);
+      --accent:       #F97316;
+      --green:        #10B981;
+      --red:          #EF4444;
+      --yellow:       #F59E0B;
+      --teal:         #06B6D4;
+      --bg:           #F5F4FA;
+      --surface:      #FFFFFF;
+      --surface-2:    #FAFAFA;
+      --border:       #E8E6F0;
+      --text:         #18162A;
+      --muted:        #8785A0;
+      --radius-sm:    10px;
+      --radius:       16px;
+      --radius-lg:    22px;
+      --shadow-sm:    0 2px 12px rgba(124,58,237,.07);
+      --shadow:       0 8px 32px rgba(124,58,237,.12);
+      --shadow-lg:    0 20px 60px rgba(124,58,237,.18);
+      --font-display: 'Syne', sans-serif;
+      --font-body:    'DM Sans', sans-serif;
+      --nav-h:        68px;
+    }
+
+    /* ── RESET ──────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text); min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    img { display: block; max-width: 100%; }
+
+    /* ── PAGE SHELL ─────────────────────── */
+    .page-wrap {
+      padding-top: var(--nav-h);
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+    }
+
+    /* ── SHARED ATOMS ───────────────────── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 50px;
+      font-size: 11px; font-weight: 700; letter-spacing: .3px;
+    }
+    .badge-purple  { background: var(--brand-glow); color: var(--brand); }
+    .badge-green   { background: rgba(16,185,129,.12); color: var(--green); }
+    .badge-yellow  { background: rgba(245,158,11,.12); color: var(--yellow); }
+    .badge-red     { background: rgba(239,68,68,.12);  color: var(--red); }
+    .badge-teal    { background: rgba(6,182,212,.12);  color: var(--teal); }
+    .badge-gray    { background: var(--border); color: var(--muted); }
+
+    .tag {
+      display: inline-block;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 3px 9px;
+      font-size: 11px; font-weight: 500; color: var(--muted);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 20px; border-radius: 50px;
+      font-size: 13px; font-weight: 600;
+      transition: all .2s; cursor: pointer; white-space: nowrap;
+    }
+    .btn-primary  { background: var(--brand); color: #fff; }
+    .btn-primary:hover  { background: #6D28D9; box-shadow: 0 4px 16px rgba(124,58,237,.35); transform: translateY(-1px); }
+    .btn-outline  { background: transparent; color: var(--brand); border: 1.5px solid var(--brand); }
+    .btn-outline:hover  { background: var(--brand-glow); }
+    .btn-ghost    { background: rgba(255,255,255,.15); color: #fff; border: 1.5px solid rgba(255,255,255,.3); }
+    .btn-ghost:hover    { background: rgba(255,255,255,.25); }
+    .btn-white    { background: #fff; color: var(--brand); }
+    .btn-white:hover    { background: #F3F0FF; box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+    .btn-teal     { background: var(--teal); color: #fff; }
+    .btn-teal:hover     { opacity: .88; transform: translateY(-1px); }
+    .btn-sm { padding: 7px 14px; font-size: 12px; }
+
+    /* ── SECTION HEADER ─────────────────── */
+    .sec-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .sec-head h2 {
+      font-family: var(--font-display);
+      font-size: 17px; font-weight: 800;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .view-all {
+      font-size: 13px; font-weight: 600; color: var(--brand);
+      display: flex; align-items: center; gap: 4px;
+      transition: gap .18s;
+    }
+    .view-all:hover { gap: 8px; }
+
+    /* ── ANIMATIONS ─────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .anim { animation: fadeUp .45s ease both; }
+    .anim-1 { animation-delay: .05s; }
+    .anim-2 { animation-delay: .12s; }
+    .anim-3 { animation-delay: .19s; }
+    .anim-4 { animation-delay: .26s; }
+    .anim-5 { animation-delay: .33s; }
+  </style>
+</head>

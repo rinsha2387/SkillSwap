@@ -1,0 +1,224 @@
+<%- include('../partials/header', { title: 'My Chats' }) %>
+<%- include('../partials/navbar', { activePage: 'chat' }) %>
+<%- include('../partials/topbar') %>
+
+<style>
+  .chats-page {
+    padding-top: 64px;
+    min-height: 100vh;
+    background: var(--bg);
+  }
+
+  .chats-container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 32px 24px 60px;
+  }
+
+  /* ── Page Title ── */
+  .chats-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .chats-title h1 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .chats-title .count-badge {
+    background: var(--brand-glow);
+    color: var(--brand);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 50px;
+  }
+
+  /* ── Chat Cards ── */
+  .chat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .chat-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow .2s, transform .15s, border-color .2s;
+  }
+  .chat-card:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+    border-color: var(--brand);
+  }
+
+  .chat-card-avatar {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--brand);
+    flex-shrink: 0;
+  }
+  .chat-card-avatar-fb {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    border: 2px solid var(--brand);
+  }
+
+  .chat-card-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .chat-card-info h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chat-card-info p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chat-card-meta {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .chat-card-meta .time {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .chat-card-meta .arrow {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--brand-glow);
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 6px;
+    margin-left: auto;
+  }
+  .chat-card-meta .arrow svg {
+    width: 13px; height: 13px;
+    color: var(--brand);
+  }
+
+  /* ── Empty State ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .empty-icon {
+    width: 64px; height: 64px;
+    background: var(--brand-glow);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .empty-icon svg { width: 28px; height: 28px; color: var(--brand); }
+  .empty-state h3 {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .empty-state p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 767px) {
+    .chats-container { padding: 20px 16px 80px; }
+  }
+</style>
+
+<div class="chats-page">
+  <div class="chats-container">
+
+    <!-- Title -->
+    <div class="chats-title">
+      <h1>💬 My Chats</h1>
+      <% if (chats.length > 0) { %>
+        <span class="count-badge"><%= chats.length %></span>
+      <% } %>
+    </div>
+
+    <!-- List -->
+    <div class="chat-list">
+      <% if (chats.length === 0) { %>
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            </svg>
+          </div>
+          <h3>No chats yet</h3>
+          <p>Accept a swap request to start chatting!</p>
+          <a href="/swaps/requests" class="btn btn-primary">View Swap Requests</a>
+        </div>
+
+      <% } else { %>
+        <% chats.forEach(chat => { %>
+          <%
+            const other = chat.participants.find(p => p._id && p._id.toString() !== currentUser._id.toString());
+            const lastTime = chat.lastMessageAt
+              ? new Date(chat.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              : '';
+          %>
+          <% if (other) { %>
+          <a href="/chats/<%= chat.swap._id %>" class="chat-card anim">
+            <% if (other.profilePic) { %>
+              <img class="chat-card-avatar" src="<%= other.profilePic %>" alt="<%= other.name %>"/>
+            <% } else { %>
+              <div class="chat-card-avatar-fb"><%= other.name.charAt(0).toUpperCase() %></div>
+            <% } %>
+
+            <div class="chat-card-info">
+              <h4><%= other.name %></h4>
+              <p><%= chat.lastMessage || 'No messages yet — say hello!' %></p>
+            </div>
+
+            <div class="chat-card-meta">
+              <span class="time"><%= lastTime %></span>
+              <div class="arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </div>
+            </div>
+          </a>
+          <% } %>
+        <% }) %>
+      <% } %>
+    </div>
+
+  </div>
+</div>

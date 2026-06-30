@@ -1,0 +1,290 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/topbar') %>
+
+<!-- Cashfree JS SDK -->
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
+<div class="checkout-page">
+  <div class="checkout-wrapper">
+
+    <!-- Left: Order Info -->
+    <div class="checkout-left">
+      <div class="brand-logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">SkillSwap</span>
+      </div>
+
+      <div class="order-info">
+        <% if (payee.profilePic) { %>
+          <img src="<%= payee.profilePic %>" alt="<%= payee.name %>" class="tutor-avatar" />
+        <% } else { %>
+          <div class="tutor-avatar avatar-fallback"><%= payee.name.charAt(0).toUpperCase() %></div>
+        <% } %>
+
+        <div class="order-details">
+          <h2><%= sessionTitle %></h2>
+          <p class="tutor-name">with <strong><%= payee.name %></strong></p>
+
+          <% if (sessionDate) { %>
+          <div class="detail-row">
+            <span>📅</span>
+            <span><%= sessionDate %></span>
+          </div>
+          <% } %>
+
+          <% if (sessionDuration) { %>
+          <div class="detail-row">
+            <span>⏱</span>
+            <span><%= sessionDuration %> mins</span>
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="price-box">
+        <div class="price-row">
+          <span>Session fee</span>
+          <span>₹<%= amount %></span>
+        </div>
+        <div class="price-row">
+          <span>Platform fee</span>
+          <span class="free">Free</span>
+        </div>
+        <div class="price-divider"></div>
+        <div class="price-row total">
+          <span>Total</span>
+          <strong>₹<%= amount %></strong>
+        </div>
+      </div>
+
+      <div class="secure-badge">
+        🔒 Secured by Cashfree Payments
+      </div>
+    </div>
+
+    <!-- Right: Embedded Cashfree Payment -->
+    <div class="checkout-right">
+      <h2 class="right-title">Choose Payment Method</h2>
+
+      <!-- Cashfree Drop-in UI renders here -->
+      <div id="payment-form"></div>
+
+      <p class="cancel-text">
+        Changed your mind? <a href="javascript:history.back()">Go back</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // paymentSessionId is passed from the controller
+  const paymentSessionId = "<%= cashfreeSessionId %>";
+  const returnUrl = "<%= returnUrl %>";
+
+  const cashfree = Cashfree({ mode: "<%= cashfreeEnv %>" }); // "sandbox" or "production"
+
+  // Cashfree Drop-in checkout options
+  const checkoutOptions = {
+    paymentSessionId: paymentSessionId,
+    redirectTarget: "_self",   // redirect in same tab
+    returnUrl: returnUrl,
+  };
+
+  // Mount the Drop-in UI into #payment-form
+  cashfree.checkout(checkoutOptions).then((result) => {
+    if (result.error) {
+      console.error("Cashfree error:", result.error);
+      document.getElementById("payment-form").innerHTML =
+        `<div class="cf-error">⚠️ Payment failed to load. Please refresh and try again.</div>`;
+    }
+  });
+</script>
+
+<style>
+  .checkout-page {
+    min-height: 100vh;
+    background: var(--bg, #eeeaf8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .checkout-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 900px;
+    width: 100%;
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(108, 99, 255, 0.14);
+    min-height: 560px;
+  }
+
+  /* ── Left Panel ── */
+  .checkout-left {
+    background: #1a1a2e;
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .logo-icon { font-size: 1.4rem; }
+
+  .logo-text {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.02em;
+  }
+
+  .order-info {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .tutor-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #6c63ff;
+    flex-shrink: 0;
+  }
+
+  .avatar-fallback {
+    background: #6c63ff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+  }
+
+  .order-details h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.25rem;
+  }
+
+  .tutor-name {
+    color: #a8a4c8;
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .detail-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #a8a4c8;
+    font-size: 0.82rem;
+    margin-bottom: 0.3rem;
+  }
+
+  /* ── Price Box ── */
+  .price-box {
+    background: rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-top: auto;
+  }
+
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.88rem;
+    color: #a8a4c8;
+    padding: 0.3rem 0;
+  }
+
+  .free { color: #4ade80; }
+
+  .price-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 0.75rem 0;
+  }
+
+  .price-row.total {
+    font-size: 1.1rem;
+    color: white;
+  }
+
+  .secure-badge {
+    font-size: 0.78rem;
+    color: #6b6a8a;
+    text-align: center;
+  }
+
+  /* ── Right Panel ── */
+  .checkout-right {
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .right-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 1.5rem;
+  }
+
+  #payment-form {
+    flex: 1;
+  }
+
+  .cf-error {
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 1rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .cancel-text {
+    margin-top: 1.5rem;
+    font-size: 0.82rem;
+    color: #aaa;
+    text-align: center;
+  }
+
+  .cancel-text a {
+    color: #6c63ff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  /* ── Mobile: stack vertically ── */
+  @media (max-width: 700px) {
+    .checkout-wrapper {
+      grid-template-columns: 1fr;
+    }
+
+    .checkout-left {
+      padding: 1.75rem 1.25rem;
+    }
+
+    .checkout-right {
+      padding: 1.75rem 1.25rem;
+    }
+  }
+</style>
+
+<%- include('../partials/footer') %>

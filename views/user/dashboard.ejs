@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/header') %>
+<body>
+
+<%- include('../partials/navbar',{ activePage: 'home' }) %>
+<%- include('../partials/topbar') %>
+
+<div class="page-wrap">
+<div class="dash-container">
+
+  <!-- ═══════════════════════════════
+       HERO BANNER
+  ════════════════════════════════ -->
+  <section class="hero-banner">
+    <div class="hero-left">
+      <p class="hero-greet">
+        <%
+          var h = new Date().getHours();
+          var greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+        %>
+        <%= greet %> 
+      </p>
+      <h1 class="hero-title">Welcome back, <%= user.name.split(' ')[0] %>!</h1>
+      <p class="hero-sub">
+        <% if (pendingSwaps > 0 && nextSession) { %>
+          You have <strong><%= pendingSwaps %> swap request<%= pendingSwaps > 1 ? 's' : '' %></strong>
+          waiting and a session with <strong><%= nextSession.otherUser ? nextSession.otherUser.name.split(' ')[0] : 'your partner' %></strong> upcoming.
+        <% } else if (pendingSwaps > 0) { %>
+          You have <strong><%= pendingSwaps %> swap request<%= pendingSwaps > 1 ? 's' : '' %></strong> waiting for your review.
+        <% } else if (nextSession) { %>
+          You have an upcoming session with <strong><%= nextSession.otherUser ? nextSession.otherUser.name.split(' ')[0] : 'your partner' %></strong>.
+        <% } else { %>
+          Everything is up to date. Start a new swap today!
+        <% } %>
+      </p>
+      <div class="hero-btns">
+        <a href="/swaps" class="hbtn hbtn-white">
+          <i class="fa-solid fa-right-left"></i> My Swaps
+        </a>
+        <a href="/explore" class="hbtn hbtn-outline">Explore Skills</a>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat">
+        <span class="hstat-num"><%= status.sent %></span>
+        <span class="hstat-lbl">Sent</span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-num"><%= status.accepted %></span>
+        <span class="hstat-lbl">Completed</span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-num"><%= status.received %></span>
+        <span class="hstat-lbl">Received</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════
+       TRENDING SKILLS
+  ════════════════════════════════ -->
+  <section class="section">
+    <div class="sec-row">
+      <h2 class="sec-title"><span class="fire-icon"></span> Trending Skills</h2>
+      <a href="/explore" class="view-all">View all <i class="fa-solid fa-chevron-right"></i></a>
+    </div>
+    <div class="skills-row">
+      <%
+        var skills = [
+          { name:'Machine Learning', growth:'+45%', learners:198, bg:'#F0EBFF', col:'#7C3AED' },
+          { name:'UI/UX Design',     growth:'+31%', learners:245, bg:'#E0F7F4', col:'#0D9488' },
+          { name:'AWS',              growth:'+27%', learners:128, bg:'#FEF9C3', col:'#CA8A04' },
+          { name:'Python',           growth:'+23%', learners:312, bg:'#DCFCE7', col:'#16A34A' },
+          { name:'React',            growth:'+18%', learners:209, bg:'#DBEAFE', col:'#2563EB' },
+          { name:'Flutter',          growth:'+12%', learners:167, bg:'#FCE7F3', col:'#DB2777' }
+        ];
+      %>
+      <% skills.forEach(function(sk) { %>
+      <div class="skill-card">
+        <span class="skill-badge" style="background:<%=sk.bg%>;color:<%=sk.col%>"><%=sk.name%></span>
+        <p class="skill-growth"><i class="fa-solid fa-arrow-trend-up"></i> <%=sk.growth%></p>
+        <p class="skill-learners"><%=sk.learners%> learners</p>
+      </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════
+       DISCOVER PEOPLE
+  ════════════════════════════════ -->
+  <section class="section">
+    <div class="sec-row">
+      <h2 class="sec-title">Discover People</h2>
+      <div class="filter-tabs">
+        <button class="ftab active">For You</button>
+        <button class="ftab">Popular</button>
+        <button class="ftab">Nearby</button>
+      </div>
+    </div>
+
+    <div class="people-grid">
+    <% if (discoverUsers && discoverUsers.length > 0) { %>
+    <% discoverUsers.forEach(function(person) { %>
+    
+      <div class="person-card">
+        <div class="pc-top">
+          <span class="pc-swap-label">
+            <%= person.skillsOffered?.[0] || 'Skill' %>
+            <%= person.skillsWanted?.[0] || 'Skill' %>
+          </span>
+
+          <span class="pc-match">
+            <i class="fa-solid fa-bolt"></i>
+            <%= Math.floor(70 + Math.random() * 25) %>% match
+          </span>
+        </div>
+
+        <div class="pc-user">
+
+          <div class="pc-avatar-wrap">
+
+            <% if (person.profilePic) { %>
+
+              <img
+                src="<%= person.profilePic %>"
+                alt="<%= person.name %>"
+                class="pc-avatar"
+              />
+
+            <% } else { %>
+
+              <div class="pc-avatar pc-avatar-fb">
+                <%= person.name.charAt(0).toUpperCase() %>
+              </div>
+
+            <% } %>
+
+            <span class="pc-online"></span>
+
+          </div>
+
+          <div class="pc-info">
+            <p class="pc-name"><%= person.name %></p>
+
+            <p class="pc-loc">
+              <i class="fa-solid fa-location-dot"></i>
+              SkillSwap Member
+            </p>
+
+            <p class="pc-rating">
+              ⭐ 4.8 <span>(24)</span>
+            </p>
+          </div>
+
+        </div>
+
+        <p class="pc-desc">
+          Offers:
+          <%= person.skillsOffered?.join(', ') || 'No skills added' %>
+
+          <br>
+
+          Wants:
+          <%= person.skillsWanted?.join(', ') || 'No skills added' %>
+        </p>
+
+        <div class="pc-tags">
+
+          <% if (person.skillsOffered && person.skillsOffered.length > 0) { %>
+
+            <% person.skillsOffered.slice(0,3).forEach(function(skill) { %>
+
+              <span class="ptag">
+                <%= skill %>
+              </span>
+
+            <% }) %>
+
+          <% } %>
+
+        </div>
+
+        <div class="pc-actions">
+
+          <button
+            class="pc-btn-swap"
+            onclick="handleSwap('<%= person._id %>')"
+          >
+            <i class="fa-solid fa-right-left"></i>
+            Request Swap
+          </button>
+
+          <button class="pc-btn-save">
+            <i class="fa-regular fa-bookmark"></i>
+          </button>
+
+        </div>
+
+      </div>
+     
+    <% }) %>
+
+  <% } else { %>
+
+    <p>No users found.</p>
+
+  <% } %>
+
+</div>
+  </section>
+
+  <!-- ═══════════════════════════════
+       UPCOMING SESSION BANNER
+  ════════════════════════════════ -->
+  <% if (nextSession) { %>
+  <section class="upcoming-banner">
+    <div class="ub-left">
+      <div class="ub-play"><i class="fa-solid fa-play"></i></div>
+      <div>
+        <p class="ub-title">Upcoming: <%= nextSession.skill || 'Session' %> with <%= nextSession.otherUser ? nextSession.otherUser.name.split(' ')[0] : 'Partner' %></p>
+        <p class="ub-meta">
+          <%= new Date(nextSession.scheduledTime).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) %>
+          • <%= new Date(nextSession.scheduledTime).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) %>
+          • 90 minutes
+        </p>
+      </div>
+    </div>
+    <% if (nextSession.joinLink) { %>
+      <a href="<%= nextSession.joinLink %>" target="_blank" class="ub-btn">
+        <i class="fa-solid fa-video"></i> Join Now
+      </a>
+    <% } else { %>
+      <a href="/sessions" class="ub-btn">View Details</a>
+    <% } %>
+  </section>
+  <% } %>
+
+  <!-- ═══════════════════════════════
+       ACTIVE SWAPPERS
+  ════════════════════════════════ -->
+  <section class="section">
+    <div class="sec-row">
+      <h2 class="sec-title"> Active Swappers</h2>
+    </div>
+   
+  </section>
+
+</div><!-- /dash-container -->
+</div><!-- /page-wrap -->
+
+<!-- ═══════════════════════════════
+     STYLES
+════════════════════════════════ -->
+<style>
+  .page-wrap      { padding-top: 64px; background: #F7F6FB; min-height: 100vh; }
+  .dash-container { max-width: 1080px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  /* ── HERO ─────────────────── */
+  .hero-banner {
+    background: linear-gradient(135deg, #6C3AED 0%, #4F46E5 60%, #4338CA 100%);
+    border-radius: 20px;
+    padding: 32px 32px 32px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-banner::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 75% 30%, rgba(255,255,255,.07) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .hero-greet  { font-size: 14px; opacity: .8; margin-bottom: 4px; }
+  .hero-title  { font-size: 26px; font-weight: 800; margin-bottom: 8px; line-height: 1.2; }
+  .hero-sub    { font-size: 13.5px; opacity: .85; line-height: 1.55; margin-bottom: 22px; max-width: 340px; }
+  .hero-sub strong { opacity: 1; }
+  .hero-btns   { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .hbtn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 20px; border-radius: 50px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all .18s;
+  }
+  .hbtn-white   { background: #fff; color: #6C3AED; }
+  .hbtn-white:hover { background: #EDE9FE; }
+  .hbtn-outline { background: rgba(255,255,255,.15); color: #fff; border: 1.5px solid rgba(255,255,255,.35); }
+  .hbtn-outline:hover { background: rgba(255,255,255,.25); }
+
+  .hero-stats { display: flex; gap: 10px; flex-shrink: 0; position: relative; z-index: 1; }
+  .hstat {
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.2);
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+    padding: 18px 20px;
+    text-align: center;
+    min-width: 82px;
+  }
+  .hstat-num { display: block; font-size: 26px; font-weight: 800; line-height: 1; }
+  .hstat-lbl { display: block; font-size: 11px; opacity: .75; margin-top: 5px; text-transform: capitalize; }
+
+  /* ── SECTIONS ─────────────── */
+  .section      { margin-bottom: 28px; }
+  .sec-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .sec-title {
+    font-size: 17px; font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
+    color: #1A1830;
+  }
+  .fire-icon { font-size: 16px; }
+  .view-all {
+    font-size: 13px; font-weight: 600; color: #6C3AED;
+    display: flex; align-items: center; gap: 4px;
+    transition: gap .18s;
+  }
+  .view-all:hover { gap: 7px; }
+
+  /* ── FILTER TABS ──────────── */
+  .filter-tabs { display: flex; gap: 4px; }
+  .ftab {
+    padding: 5px 14px; border-radius: 50px;
+    font-size: 12px; font-weight: 500; color: #8785A0;
+    background: #fff; border: 1.5px solid #E8E6F0;
+    cursor: pointer; transition: all .18s;
+  }
+  .ftab.active, .ftab:hover { background: #6C3AED; color: #fff; border-color: #6C3AED; }
+
+  /* ── SKILLS ROW ───────────── */
+  .skills-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+  }
+  .skill-card {
+    background: #fff;
+    border: 1px solid #E8E6F0;
+    border-radius: 14px;
+    padding: 14px 14px 12px;
+    display: flex; flex-direction: column; gap: 5px;
+    transition: transform .18s, box-shadow .18s;
+  }
+  .skill-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.07); }
+  .skill-badge {
+    display: inline-block;
+    padding: 4px 10px; border-radius: 50px;
+    font-size: 11px; font-weight: 700;
+    width: fit-content;
+  }
+  .skill-growth  { font-size: 12px; color: #10B981; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+  .skill-learners{ font-size: 11px; color: #8785A0; }
+
+  /* ── PEOPLE GRID ──────────── */
+  .people-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .person-card {
+    background: #fff;
+    border: 1px solid #E8E6F0;
+    border-radius: 16px;
+    padding: 18px;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: box-shadow .18s, transform .18s;
+  }
+  .person-card:hover { box-shadow: 0 8px 32px rgba(108,58,237,.10); transform: translateY(-2px); }
+
+  .pc-top { display: flex; align-items: center; justify-content: space-between; }
+  .pc-swap-label { font-size: 11px; color: #8785A0; font-weight: 500; }
+  .pc-match {
+    font-size: 11px; font-weight: 700; color: #F59E0B;
+    background: #FEF9C3; padding: 3px 9px; border-radius: 50px;
+    border: 1px solid #FDE68A;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .person-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .person-card-link:hover .person-card {
+    transform: translateY(-3px);
+    transition: 0.2s ease;
+  }
+  .pc-user  { display: flex; gap: 12px; align-items: center; }
+  .pc-avatar-wrap { position: relative; flex-shrink: 0; }
+  .pc-avatar {
+    width: 46px; height: 46px; border-radius: 50%; object-fit: cover;
+  }
+  .pc-avatar-fb {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: linear-gradient(135deg,#6C3AED,#4F46E5);
+    color: #fff; font-weight: 700; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pc-online {
+    position: absolute; bottom: 1px; right: 1px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: #10B981; border: 2px solid #fff;
+  }
+  .pc-name   { font-weight: 700; font-size: 14px; }
+  .pc-loc    { font-size: 11px; color: #8785A0; margin-top: 2px; display: flex; align-items: center; gap: 3px; }
+  .pc-rating { font-size: 12px; margin-top: 2px; color: #1A1830; }
+  .pc-rating span { color: #8785A0; font-size: 11px; }
+  .pc-desc   { font-size: 12px; color: #8785A0; line-height: 1.5; }
+
+  .pc-tags   { display: flex; flex-wrap: wrap; gap: 5px; }
+  .ptag {
+    background: #F5F4FA; border: 1px solid #E8E6F0;
+    border-radius: 6px; padding: 3px 8px;
+    font-size: 11px; font-weight: 500; color: #8785A0;
+  }
+  .ptag-more { color: #6C3AED; background: #EDE9FE; border-color: #DDD6FE; }
+
+  .pc-actions { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+  .pc-btn-swap {
+    flex: 1; padding: 9px 0; border-radius: 50px;
+    background: #EDE9FE; color: #6C3AED;
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    cursor: pointer; border: none; transition: all .18s;
+  }
+  .pc-btn-swap:hover { background: #6C3AED; color: #fff; }
+  .pc-btn-save {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1.5px solid #E8E6F0;
+    display: flex; align-items: center; justify-content: center;
+    color: #8785A0; font-size: 13px; background: #fff;
+    cursor: pointer; transition: all .18s;
+  }
+  .pc-btn-save:hover { border-color: #6C3AED; color: #6C3AED; }
+
+  /* ── UPCOMING BANNER ──────── */
+  .upcoming-banner {
+    background: #0F172A;
+    border-radius: 16px;
+    padding: 18px 24px;
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 28px; color: #fff;
+  }
+  .ub-left  { display: flex; align-items: center; gap: 14px; flex: 1; }
+  .ub-play  {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #06B6D4;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .ub-title  { font-weight: 700; font-size: 14px; }
+  .ub-meta   { font-size: 12px; color: rgba(255,255,255,.55); margin-top: 3px; }
+  .ub-btn {
+    background: #06B6D4; color: #fff;
+    padding: 9px 20px; border-radius: 50px;
+    font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
+    transition: opacity .18s; flex-shrink: 0;
+  }
+  .ub-btn:hover { opacity: .85; }
+
+  /* ── ACTIVE SWAPPERS ──────── */
+  .swappers-row {
+    background: #fff;
+    border: 1px solid #E8E6F0;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .swapper-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #F1EFF8;
+    transition: background .15s;
+  }
+  .swapper-card:last-child { border-bottom: none; }
+  .swapper-card:hover { background: #FAFAFA; }
+
+  .sw-avatar-wrap { position: relative; flex-shrink: 0; }
+  .sw-avatar {
+    width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
+  }
+  .sw-avatar-fb {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg,#6C3AED,#4F46E5);
+    color: #fff; font-size: 17px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sw-online {
+    position: absolute; bottom: 1px; right: 1px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: #10B981; border: 2px solid #fff;
+  }
+  .sw-info  { flex: 1; }
+  .sw-name  { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 5px; margin-bottom: 6px; }
+  .sw-verified { color: #06B6D4; font-size: 12px; }
+  .sw-tags  { display: flex; flex-wrap: wrap; gap: 5px; }
+  .sw-rating{ font-weight: 700; font-size: 13px; margin-left: auto; flex-shrink: 0; }
+
+  /* ── RESPONSIVE ───────────── */
+  @media (max-width: 1024px) {
+    .skills-row { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 860px) {
+    .people-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-banner { flex-direction: column; align-items: flex-start; }
+    .hero-stats  { width: 100%; }
+    .hstat       { flex: 1; }
+  }
+  @media (max-width: 640px) {
+    .dash-container { padding: 16px 14px 40px; }
+    .skills-row     { grid-template-columns: repeat(2, 1fr); }
+    .people-grid    { grid-template-columns: 1fr; }
+    .sec-row        { flex-wrap: wrap; gap: 10px; }
+    .hero-title     { font-size: 22px; }
+    .upcoming-banner{ flex-wrap: wrap; }
+    .hero-stats     { flex-wrap: wrap; }
+    .hstat          { min-width: calc(50% - 5px); }
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.ftab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.ftab').forEach(function(t){ t.classList.remove('active'); });
+      this.classList.add('active');
+    });
+  });
+  
+  
+  async function handleSwap(receiverId) {
+    try {
+      const res = await fetch('/swaps/send', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        receiverId: receiverId,
+
+        // temporary 
+        skillsOffered: "UI Design",
+        skillsWanted: "Video Editing",
+        message: "Hi, let's swap skills!"
+      })
+    });
+
+   
+
+    if (res.redirected) {
+      window.location.href = res.url;
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Request failed");
+      return;
+    }
+
+    alert("Swap request sent!");
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
+    if (name) alert('Swap request sent to ' + name + '! ✅');
+}
+
+  
+</script>
+
+</body>
+</html>
+
