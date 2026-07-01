@@ -9,15 +9,4 @@ const reviewSchema = new mongoose.Schema({
   comment:  { type: String, default: '' }
 }, { timestamps: true });
 
-
-reviewSchema.index(
-  { reviewer: 1, swap: 1 },
-  { unique: true, sparse: true }
-);
-
-reviewSchema.index(
-  { reviewer: 1, groupSession: 1 },
-  { unique: true, sparse: true }
-);
-
 module.exports = mongoose.model('review', reviewSchema);
