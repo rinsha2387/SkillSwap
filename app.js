@@ -59,6 +59,7 @@ app.use('/admin', adminRoutes);
 
 app.use('/profile-setup', profileSetupRoute);
 
+app.get('/', (req, res) => res.redirect(req.isAuthenticated() ? '/dashboard' : '/auth/login'));
 app.use('/', dashboardRoutes);
 app.use('/profile', profileRoutes);
 

@@ -1,7 +1,7 @@
 const express      = require('express');
 const router       = express.Router();
 const { protect }  = require('../middleware/authMiddleware');
-const SwapRequest  = require('../models/SwapRequest'); 
+const SwapRequest  = require('../models/swapRequest'); 
 const Review       = require('../models/reviews');      
 const { showWriteForm, showWriteFormGroup, submitReview } = require('../controllers/reviewController');
 
