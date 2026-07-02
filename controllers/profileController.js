@@ -132,7 +132,7 @@ exports.getPublicProfile = async (req, res) => {
    });
 
     return res.render('user/publicProfile', {
-      user: profileUser,       
+      user: req.user,       
       profileUser: profileUser,
       status,
       currentUser:    req.user,
