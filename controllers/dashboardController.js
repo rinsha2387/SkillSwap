@@ -14,16 +14,16 @@ exports.getDashboard = async (req, res) => {
         $or: [{ requester: userId }, { receiver: userId }],
         status: 'completed'
       }),
-      // pendingSwaps = only truly pending requests received by you
+      
       SwapRequest.countDocuments({ receiver: userId, status: 'pending' })
     ]);
 
-    // ── Recent Requests (all statuses, for dashboard feed) ──
+    
     const rawRequests = await SwapRequest.find({
       $or: [{ requester: userId }, { receiver: userId }]
     })
       .sort({ createdAt: -1 })
-      .limit(10)  // fetch more so completed ones appear
+      .limit(10)  
       .populate('requester receiver', 'name profilePic')
       .lean();
 
@@ -39,9 +39,9 @@ exports.getDashboard = async (req, res) => {
         status:        r.status,
         _id:           r._id
       };
-    }).filter(r => r.otherUser); // remove any with missing user
+    }).filter(r => r.otherUser); 
 
-    // ── Upcoming Sessions (accepted swaps) ──
+    
     const rawSessions = await SwapRequest.find({
       $or: [{ requester: userId }, { receiver: userId }],
       status: 'accepted'
@@ -65,7 +65,7 @@ exports.getDashboard = async (req, res) => {
       };
     }).filter(s => s.otherUser);
 
-    // ── Discover Users with real ratings ──
+   
     const rawDiscoverUsers = await Users.find({ _id: { $ne: userId } })
       .select('_id name profilePic skillsOffered skillsWanted location city country')
       .lean();
@@ -88,7 +88,7 @@ exports.getDashboard = async (req, res) => {
       };
     });
 
-    // ── Swap status map for discover cards ──
+   
     const existingSwaps = await SwapRequest.find({
       $or: [{ requester: userId }, { receiver: userId }],
       status: { $in: ['pending', 'accepted'] }
@@ -125,7 +125,7 @@ exports.getDashboard = async (req, res) => {
       .sort((a, b) => b.avgRating - a.avgRating)
       .slice(0, 3);
 
-    // ── Trending Skills ──
+   
     const allUsers = await Users.find({}, 'skillsOffered').lean();
     const skillCountMap = {};
     allUsers.forEach(u => {
@@ -148,7 +148,7 @@ exports.getDashboard = async (req, res) => {
       status: { sent, received, completed },
       recentRequests,
       upcomingSessions,
-      pendingSwaps,   // ← only truly pending received requests
+      pendingSwaps,  
       nextSession,
       discoverUsers,
       trendingSkills,

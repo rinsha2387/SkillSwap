@@ -23,7 +23,6 @@ const paymentSchema = new mongoose.Schema(
       default: null,
     },
 
-    // ── Cashfree fields (replaced Stripe fields) ──
     cashfreeOrderId: {
       type: String,
       required: true,
@@ -38,7 +37,6 @@ const paymentSchema = new mongoose.Schema(
       default: null,
     },
 
-    // Amount in paise (₹1 = 100 paise)
     amount: {
       type: Number,
       required: true,

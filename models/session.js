@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// Auto-generate a unique Jitsi room name from the swap ID
 function generateJitsiLink(swapId) {
   return `https://meet.jit.si/skillswap-${swapId}`;
 }
@@ -29,7 +28,7 @@ const sessionSchema = new mongoose.Schema({
     required: true
   },
   duration: {
-    type: Number, // minutes
+    type: Number, 
     default: 60
   },
   meetLink: {
@@ -47,7 +46,6 @@ const sessionSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Export the helper too so controller can use it
 sessionSchema.statics.generateJitsiLink = generateJitsiLink;
 
 module.exports = mongoose.model('Session', sessionSchema);

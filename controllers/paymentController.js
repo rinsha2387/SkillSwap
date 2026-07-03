@@ -3,13 +3,11 @@ const Payment = require('../models/Payment');
 const SwapRequest = require('../models/swapRequest');
 const SwapSession = require('../models/session');
 
-// Cashfree base URL — use sandbox for testing, production for live
 const CF_BASE_URL =
   process.env.CASHFREE_ENV === 'production'
     ? 'https://api.cashfree.com/pg'
     : 'https://sandbox.cashfree.com/pg';
 
-// Cashfree API headers
 const cfHeaders = () => ({
   'x-client-id': process.env.CASHFREE_APP_ID,
   'x-client-secret': process.env.CASHFREE_SECRET_KEY,
